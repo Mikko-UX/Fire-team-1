@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Combat Calculator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f0f0f4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px;
+    }
+
+    .container { width: 100%; max-width: 520px; }
+
+    /* ── Nav ── */
+    .nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border: 2px solid #1a1a2e;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .nav-btn {
+      padding: 17px 12px;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+      background: #e2e2e8;
+      color: #7a7a8c;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-btn:first-child { border-right: 2px solid #1a1a2e; }
+    .nav-btn.active {
+      background: #1a1a2e;
+      color: #ffffff;
+      font-weight: 500;
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: #e2e2e8;
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 16px;
+    }
+    .panel-inner {
+      background: #ffffff;
+      border: 1px solid #d8d8e0;
+      border-radius: 8px;
+      padding: 22px 24px;
+    }
+    .section-title {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #1a1a2e;
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #e8e8f0;
+    }
+
+    /* ── Fields ── */
+    .field { margin-bottom: 20px; }
+    .field-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a1a2e;
+      text-align: center;
+      margin-bottom: 9px;
+    }
+    .radio-group {
+      display: flex;
+      gap: 6px;
+      background: #f0f0f4;
+      border-radius: 8px;
+      padding: 10px 12px;
+      flex-wrap: wrap;
+    }
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      flex: 1;
+      min-width: 54px;
+    }
+    .radio-item input[type=radio] {
+      accent-color: #2563eb;
+      width: 17px; height: 17px;
+      cursor: pointer;
+    }
+    .radio-item span { font-size: 13px; color: #1a1a2e; white-space: nowrap; }
+
+    .checkbox-group {
+      display: flex;
+      gap: 6px;
+      background: #f0f0f4;
+      border-radius: 8px;
+      padding: 10px 12px;
+      flex-wrap: wrap;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      flex: 1;
+      min-width: 120px;
+    }
+    .checkbox-item input[type=checkbox] {
+      accent-color: #2563eb;
+      width: 17px; height: 17px;
+      cursor: pointer;
+    }
+    .checkbox-group.single-column {
+      display: block;
+    }
+    .checkbox-group.single-column .checkbox-item {
+      flex: none;
+      min-width: auto;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .select-wrap { position: relative; }
+    .select-wrap select {
+      width: 100%;
+      padding: 10px 40px 10px 12px;
+      border: 1px solid #c8c8d4;
+      border-radius: 6px;
+      background: #fff;
+      color: #1a1a2e;
+      font-size: 13px;
+      appearance: none;
+      cursor: pointer;
+    }
+    .select-arrow {
+      position: absolute; right: 0; top: 0; bottom: 0;
+      width: 36px;
+      background: #2563eb;
+      border-radius: 0 6px 6px 0;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 11px; pointer-events: none;
+    }
+
+    .text-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #c8c8d4;
+      border-radius: 6px;
+      background: #fff;
+      color: #1a1a2e;
+      font-size: 13px;
+    }
+    .text-input:focus, .select-wrap select:focus { outline: 2px solid #2563eb; outline-offset: 1px; }
+
+    /* ── Result ── */
+    .result-box {
+      background: #ffffff;
+      border: 1px solid #d8d8e0;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .result-box.visible { display: block; }
+    .result-title {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #7a7a8c;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .result-card {
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+    }
+    .result-card.hit { background: #e8f5e9; }
+    .result-card.miss { background: #fdecea; }
+    .result-card .val {
+      font-size: 28px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .result-card.hit .val { color: #1b5e20; }
+    .result-card.miss .val { color: #b71c1c; }
+    .result-card .lbl { font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; }
+    .result-card.hit .lbl { color: #388e3c; }
+    .result-card.miss .lbl { color: #c62828; }
+
+    /* ── Button ── */
+    .calc-btn {
+      width: 100%;
+      padding: 14px;
+      background: #1a1a2e;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .calc-btn:hover { background: #2a2a4e; }
+    .calc-btn:active { transform: scale(0.98); }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Nav -->
+  <div class="nav">
+    <button class="nav-btn active" id="btn-vehicle" onclick="switchSection('vehicle')">Vehicle combat</button>
+    <button class="nav-btn" id="btn-infantry" onclick="switchSection('infantry')">Infantry combat</button>
+  </div>
+
+  <!-- Panel -->
+  <div class="panel">
+    <div class="panel-inner">
+
+      <!-- Vehicle section -->
+      <div id="section-vehicle">
+        <div class="section-title">Vehicle Combat Calculator</div>
+
+        <div class="field">
+          <div class="field-label">Shooter Country</div>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="shooter-country" value="US" checked onchange="filterWeapons('vehicle')"><span>🇺🇸 US</span></label>
+            <label class="radio-item"><input type="radio" name="shooter-country" value="Soviet" onchange="filterWeapons('vehicle')"><span>🇷🇺 Soviet</span></label>
+            <label class="radio-item"><input type="radio" name="shooter-country" value="FIN" onchange="filterWeapons('vehicle')"><span>🇫🇮 FIN</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Shooter Weapon</div>
+          <div class="select-wrap">
+            <select id="shooter_weapon" required>
+              <option value="">— select weapon —</option>
+              <!-- Weapons will be populated by JavaScript -->
+            </select>
+            <div class="select-arrow">▼</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Target Country</div>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="target-country" value="US" checked onchange="filterWeapons('vehicle')"><span>🇺🇸 US</span></label>
+            <label class="radio-item"><input type="radio" name="target-country" value="Soviet" onchange="filterWeapons('vehicle')"><span>🇷🇺 Soviet</span></label>
+            <label class="radio-item"><input type="radio" name="target-country" value="FIN" onchange="filterWeapons('vehicle')"><span>🇫🇮 FIN</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Target Weapon</div>
+          <div class="select-wrap">
+            <select id="target_weapon" required>
+              <option value="">— select weapon —</option>
+              <!-- Weapons will be populated by JavaScript -->
+            </select>
+            <div class="select-arrow">▼</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Target Side</div>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="target_side" value="Front" checked><span>Front</span></label>
+            <label class="radio-item"><input type="radio" name="target_side" value="Flank"><span>Flank</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Range (hexes)</div>
+          <input class="text-input" type="number" id="range_hexes" min="0" required>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Shooter Modifiers</div>
+          <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" name="shooter_modifier" value="4"><span>Cautious move (+4)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="shooter_modifier" value="2"><span>Change facing (+2)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="shooter_modifier" value="1"><span>Opportunity fire (+1)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="shooter_modifier" value="3"><span>Moving fire (+3)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="shooter_modifier" value="4"><span>Out of smoke (+4)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="shooter_modifier" value="2"><span>Night (+2)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="shooter_modifier" value="-1"><span>In firing ramp (-1)</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Target Modifiers (Column Shift)</div>
+          <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" name="target_modifier" value="2"><span>In buildings (+2)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="target_modifier" value="3"><span>In smoke (+3)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="target_modifier" value="2"><span>In woods (+2)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="target_modifier" value="1"><span>Defilade/fire ramp (+1)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="target_modifier" value="1"><span>Cautious move (+1)</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Leadership</div>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="leadership" value="0" checked><span>0</span></label>
+            <label class="radio-item"><input type="radio" name="leadership" value="1"><span>-1</span></label>
+            <label class="radio-item"><input type="radio" name="leadership" value="2"><span>-2</span></label>
+            <label class="radio-item"><input type="radio" name="leadership" value="3"><span>-3</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Fear</div>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="fear" value="0" checked><span>0</span></label>
+            <label class="radio-item"><input type="radio" name="fear" value="1"><span>+1</span></label>
+            <label class="radio-item"><input type="radio" name="fear" value="2"><span>+2</span></label>
+            <label class="radio-item"><input type="radio" name="fear" value="3"><span>+3</span></label>
+            <label class="radio-item"><input type="radio" name="fear" value="4"><span>+4</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Infantry section -->
+      <div id="section-infantry" class="hidden">
+        <div class="section-title">Infantry Combat Calculator</div>
+
+        <div class="field">
+          <div class="field-label">Leadership</div>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="i-leadership" value="0" checked><span>0</span></label>
+            <label class="radio-item"><input type="radio" name="i-leadership" value="1"><span>-1</span></label>
+            <label class="radio-item"><input type="radio" name="i-leadership" value="2"><span>-2</span></label>
+            <label class="radio-item"><input type="radio" name="i-leadership" value="3"><span>-3</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Fear</div>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="i-fear" value="0" checked><span>0</span></label>
+            <label class="radio-item"><input type="radio" name="i-fear" value="1"><span>+1</span></label>
+            <label class="radio-item"><input type="radio" name="i-fear" value="2"><span>+2</span></label>
+            <label class="radio-item"><input type="radio" name="i-fear" value="3"><span>+3</span></label>
+            <label class="radio-item"><input type="radio" name="i-fear" value="4"><span>+4</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Firepower</div>
+          <input class="text-input" type="number" id="firepower" min="0" required>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Target Modifiers</div>
+          <div class="checkbox-group single-column">
+            <label class="checkbox-item"><input type="checkbox" name="i-modifier" value="2"><span>Target in defilade (+2)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-modifier" value="3"><span>Target is cautious moving (+3)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-modifier" value="3"><span>Target in wood buildings (+3)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-modifier" value="4"><span>Target in stone buildings (+4)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-modifier" value="2"><span>Target in woods vs. direct fire (+2)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-modifier" value="-1"><span>Target in woods vs. indirect fire (-1)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-modifier" value="1"><span>Target in cover (+1)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-modifier" value="-2"><span>Target is a vehicle (-2)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-modifier" value="2"><span>Target entrenched vs. direct fire (+2)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-modifier" value="3"><span>Target entrenched vs. indirect fire (+3)</span></label>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-box" id="result-box">
+    <div class="result-title">Result</div>
+    <div id="result-content">
+      <!-- Results will be displayed here -->
+    </div>
+  </div>
+
+  <button class="calc-btn" onclick="calculate()">🎲 Roll the dice</button>
+
+</div>
+
+<script>
+  let activeSection = 'vehicle';
+  let weapons = [];
+
+  async function loadWeapons() {
+    try {
+      const response = await fetch('/api/weapons');
+      const data = await response.json();
+      weapons = data.weapons;
+      filterWeapons('vehicle');
+    } catch (error) {
+      console.error('Error loading weapons:', error);
+    }
+  }
+
+  function filterWeapons(section) {
+    if (section === 'vehicle') {
+      const shooterCountry = document.querySelector('input[name="shooter-country"]:checked').value;
+      const targetCountry = document.querySelector('input[name="target-country"]:checked').value;
+      const shooterWeapons = weapons.filter(w => w.country === shooterCountry);
+      const targetWeapons = weapons.filter(w => w.country === targetCountry);
+      populateSelect('shooter_weapon', shooterWeapons);
+      populateSelect('target_weapon', targetWeapons);
+    }
+  }
+
+  function getSelectedNumericValue(name, defaultValue = 0) {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? Number(el.value) : defaultValue;
+  }
+
+  function populateSelect(selectId, weaponList) {
+    const select = document.getElementById(selectId);
+    select.innerHTML = '<option value="">— select weapon —</option>';
+    weaponList.forEach(weapon => {
+      const option = document.createElement('option');
+      option.value = weapon.name;
+      option.textContent = weapon.name;
+      select.appendChild(option);
+    });
+  }
+
+  function switchSection(section) {
+    activeSection = section;
+    document.getElementById('section-vehicle').classList.toggle('hidden', section !== 'vehicle');
+    document.getElementById('section-infantry').classList.toggle('hidden', section !== 'infantry');
+    document.getElementById('btn-vehicle').classList.toggle('active', section === 'vehicle');
+    document.getElementById('btn-infantry').classList.toggle('active', section === 'infantry');
+    document.getElementById('result-box').classList.remove('visible');
+  }
+
+  function getVal(name) {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? el.value : null;
+  }
+
+  let audioContext;
+  function getAudioContext() {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+    return audioContext;
+  }
+
+  function speakResultText(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function playBulletMissSound() {
+    const ctx = getAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(1200, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.25);
+    gain.gain.setValueAtTime(0.001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.25);
+  }
+
+  function playExplosionSound() {
+    const ctx = getAudioContext();
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 2);
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.9, ctx.currentTime + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    noise.connect(gain).connect(ctx.destination);
+    noise.start(ctx.currentTime);
+    noise.stop(ctx.currentTime + 0.5);
+  }
+
+  function playShootAndScreamSound() {
+    const ctx = getAudioContext();
+    const gunBuffer = ctx.createBuffer(1, ctx.sampleRate * 0.12, ctx.sampleRate);
+    const gunData = gunBuffer.getChannelData(0);
+    for (let i = 0; i < gunData.length; i++) {
+      gunData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / gunData.length, 3);
+    }
+    const gun = ctx.createBufferSource();
+    gun.buffer = gunBuffer;
+    const gunGain = ctx.createGain();
+    gunGain.gain.setValueAtTime(0.001, ctx.currentTime);
+    gunGain.gain.exponentialRampToValueAtTime(1, ctx.currentTime + 0.01);
+    gunGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    gun.connect(gunGain).connect(ctx.destination);
+    gun.start(ctx.currentTime);
+    gun.stop(ctx.currentTime + 0.12);
+
+    const screamBuffer = ctx.createBuffer(1, ctx.sampleRate * 0.35, ctx.sampleRate);
+    const screamData = screamBuffer.getChannelData(0);
+    for (let i = 0; i < screamData.length; i++) {
+      const t = i / screamData.length;
+      screamData[i] = Math.sin(2 * Math.PI * (400 + 700 * t) * i / ctx.sampleRate) * Math.exp(-4 * t) * (Math.random() * 0.5 + 0.5);
+    }
+    const scream = ctx.createBufferSource();
+    scream.buffer = screamBuffer;
+    const screamGain = ctx.createGain();
+    screamGain.gain.setValueAtTime(0.001, ctx.currentTime + 0.12);
+    screamGain.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + 0.15);
+    screamGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+    scream.connect(screamGain).connect(ctx.destination);
+    scream.start(ctx.currentTime + 0.12);
+    scream.stop(ctx.currentTime + 0.45);
+  }
+
+  function handleResultAudio(type, result) {
+    if (!('speechSynthesis' in window)) return;
+    if (type === 'vehicle') {
+      const noKill = result.solver?.toLowerCase().includes('no kill number available');
+      const noEffect = result.solver?.toLowerCase().includes('no effect');
+      const destroyed = result.solver?.toLowerCase().includes('destroy');
+      if (noKill) {
+        speakResultText('No kill number available');
+        playBulletMissSound();
+      } else if (noEffect) {
+        speakResultText('NO EFFECT');
+        playBulletMissSound();
+      } else if (destroyed) {
+        speakResultText('Vehicle destroyed');
+        playExplosionSound();
+      } else {
+        speakResultText('No effect');
+        playShootAndScreamSound();
+      }
+    } else {
+      const isNoEffect = result.result === '0';
+      const isFlip = result.result === 'F';
+      const isEliminated = result.result === 'E';
+      if (isNoEffect) {
+        speakResultText('NO EFFECT');
+        playBulletMissSound();
+      } else if (isFlip) {
+        speakResultText('Infantry decimated, officer check');
+        playExplosionSound();
+      } else if (isEliminated) {
+        speakResultText('Infantry eliminated');
+        playExplosionSound();
+      } else {
+        speakResultText('Infantry hit');
+        playShootAndScreamSound();
+      }
+    }
+  }
+
+  async function calculate() {
+    const s = activeSection;
+    let formData;
+    let endpoint;
+
+    if (s === 'vehicle') {
+      const shooterModifiers = Array.from(document.querySelectorAll('input[name="shooter_modifier"]:checked')).reduce((sum, el) => sum + Number(el.value), 0);
+      const targetModifiers = Array.from(document.querySelectorAll('input[name="target_modifier"]:checked')).reduce((sum, el) => sum + Number(el.value), 0);
+      formData = new FormData();
+      formData.append('shooter_weapon', document.getElementById('shooter_weapon').value);
+      formData.append('target_weapon', document.getElementById('target_weapon').value);
+      formData.append('target_side', getVal('target_side') || 'Front');
+      formData.append('range_hexes', document.getElementById('range_hexes').value);
+      formData.append('column_shifts', 0);
+      formData.append('leadership', getSelectedNumericValue('leadership', 0));
+      formData.append('fear', getSelectedNumericValue('fear', 0));
+      formData.append('shooter_modifiers', shooterModifiers);
+      formData.append('target_modifiers', targetModifiers);
+      endpoint = '/api/vehicle-combat';
+    } else {
+      const infantryModifiers = Array.from(document.querySelectorAll('input[name="i-modifier"]:checked')).reduce((sum, el) => sum + Number(el.value), 0);
+      formData = new FormData();
+      formData.append('firepower', document.getElementById('firepower').value);
+      formData.append('modifiers', infantryModifiers);
+      formData.append('leadership', getSelectedNumericValue('i-leadership', 0));
+      formData.append('fear', getSelectedNumericValue('i-fear', 0));
+      endpoint = '/api/infantry-combat';
+    }
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        body: formData
+      });
+      const result = await response.json();
+      displayResult(result, s);
+    } catch (error) {
+      console.error('Error:', error);
+      displayResult({error: 'Calculation failed'}, s);
+    }
+  }
+
+  function displayResult(result, type) {
+    const resultDiv = document.getElementById('result-content');
+    if (result.error) {
+      resultDiv.innerHTML = `<div style="color: #dc3545;">${result.error}</div>`;
+    } else if (type === 'vehicle') {
+      const killNumberText = result.kill_number !== undefined && result.kill_number !== null ? result.kill_number : 'N/A';
+      const hitThresholdText = result.hit_threshold !== undefined && result.hit_threshold !== null ? result.hit_threshold : 'N/A';
+      const dieRollText = result.die_roll !== undefined && result.die_roll !== null ? `<strong>🎲 ${result.die_roll}</strong>` : 'N/A';
+      const isHit = result.hit === true;
+      const outcomeIcon = isHit ? '💥' : '❌';
+      const outcomeText = result.solver ? result.solver : (isHit ? 'Hit' : 'No effect');
+      const outcomeStyle = isHit ? 'color: #1b5e20; font-weight: 700;' : 'color: #b71c1c; font-weight: 700;';
+      resultDiv.innerHTML = `
+        <div style="margin-bottom: 15px;">
+          <strong>Kill Number:</strong> ${killNumberText}
+        </div>
+        <div style="margin-bottom: 10px;"><strong>Ammo:</strong> ${result.ammo}</div>
+        <div style="margin-bottom: 10px;"><strong>Firepower:</strong> ${result.firepower}</div>
+        <div style="margin-bottom: 10px;"><strong>Armor:</strong> ${result.armor}</div>
+        <div style="margin-bottom: 10px;"><strong>Base Column:</strong> ${result.base_col || 'N/A'}</div>
+        <div style="margin-bottom: 10px;"><strong>Final Column:</strong> ${result.final_col || 'N/A'}</div>
+        <div style="margin-bottom: 10px;"><strong>Hit Threshold:</strong> ${hitThresholdText}</div>
+        <div style="margin-bottom: 10px;"><strong>Die Roll:</strong> ${dieRollText}</div>
+        <div style="margin-bottom: 10px;"><strong>Outcome:</strong> <span style="${outcomeStyle}">${outcomeIcon} ${outcomeText}</span></div>
+      `;
+    } else {
+      const isNoEffect = result.result === "0";
+      const resultStyle = isNoEffect ? 'color: #b71c1c; font-weight: 700;' : 'color: #1b5e20; font-weight: 700;';
+      resultDiv.innerHTML = `
+        <div style="margin-bottom: 15px;">
+          <strong>Result:</strong> <span style="${resultStyle}">${result.result} - ${result.decoded}</span>
+        </div>
+        <div style="margin-bottom: 10px;"><strong>🎲 Die Roll:</strong> <strong>${result.die_roll}</strong> + Modifiers: ${result.modifiers} = <span style="font-weight: 900; font-size: 1.1em;">${result.modified_roll}</span></div>
+        <div style="margin-bottom: 10px;"><strong>Table Coordinate:</strong> ${result.table_coord}</div>
+        <div style="margin-bottom: 10px;"><strong>Leadership:</strong> ${result.leadership}</div>
+        <div style="margin-bottom: 10px;"><strong>Fear:</strong> ${result.fear}</div>
+        <div style="margin-bottom: 10px;"><strong>Firepower:</strong> ${result.firepower_input} (${result.col_range_description})</div>
+        <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; font-size: 12px; white-space: pre-wrap;">${result.explanation}</pre>
+      `;
+    }
+    document.getElementById('result-box').classList.add('visible');
+    handleResultAudio(type, result);
+  }
+
+  // Load weapons on page load
+  loadWeapons();
+</script>
+</body>
+</html>
