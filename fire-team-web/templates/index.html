@@ -436,8 +436,9 @@
     if (section === 'vehicle') {
       const shooterCountry = document.querySelector('input[name="shooter-country"]:checked').value;
       const targetCountry = document.querySelector('input[name="target-country"]:checked').value;
+      const excludedTargetTypes = ['MSL', 'RKT', 'SAM'];
       const shooterWeapons = weapons.filter(w => w.country === shooterCountry);
-      const targetWeapons = weapons.filter(w => w.country === targetCountry);
+      const targetWeapons = weapons.filter(w => w.country === targetCountry && !excludedTargetTypes.includes(w.type));
       populateSelect('shooter_weapon', shooterWeapons);
       populateSelect('target_weapon', targetWeapons);
     }
