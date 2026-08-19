@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Optional, Literal, Dict, Any, NamedTuple
 from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import uvicorn
@@ -543,6 +543,23 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+# --- PWA: manifest & service worker served from root scope ---
+@app.get("/manifest.webmanifest", include_in_schema=False)
+async def manifest():
+    return FileResponse(
+        BASE_DIR / "manifest.webmanifest",
+        media_type="application/manifest+json",
+    )
+
+@app.get("/sw.js", include_in_schema=False)
+async def service_worker():
+    # Served from "/" so the service worker can control the whole app.
+    return FileResponse(
+        BASE_DIR / "sw.js",
+        media_type="application/javascript",
+        headers={"Service-Worker-Allowed": "/", "Cache-Control": "no-cache"},
+    )
 
 @app.get("/api/weapons")
 async def get_weapons():
