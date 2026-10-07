@@ -237,41 +237,69 @@
     .calc-btn:active { transform: scale(0.98); }
 
     /* ── Command points ── */
-    .chit-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-    .chit {
-      background: #f0f0f4;
-      border-radius: 8px;
-      padding: 8px 4px;
-      text-align: center;
-    }
+    .cp-turn { font-size: 12px; color: #7a7a8c; text-align: center; margin: -14px 0 18px; }
+    .cp-cup-row { display: grid; grid-template-columns: 64px repeat(5, 1fr); gap: 5px; align-items: center; margin-bottom: 6px; }
+    .cp-cup-row .side { font-size: 12px; font-weight: 500; color: #1a1a2e; }
+    .chit { background: #f0f0f4; border-radius: 8px; padding: 6px 2px; text-align: center; }
     .chit .face {
-      width: 34px; height: 34px;
-      margin: 0 auto 6px;
+      width: 26px; height: 26px;
+      margin: 0 auto 4px;
       border: 2px solid #1a1a2e;
-      border-radius: 6px;
+      border-radius: 5px;
       background: #fff;
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px; font-weight: 600; color: #1a1a2e;
+      font-size: 13px; font-weight: 600; color: #1a1a2e;
     }
     .chit.empty .face { border-color: #c8c8d4; color: #c8c8d4; }
-    .chit .count { font-size: 12px; color: #7a7a8c; }
+    .chit .count { font-size: 11px; color: #7a7a8c; }
     .cp-sub { font-size: 12px; color: #7a7a8c; text-align: center; margin-top: 8px; }
 
-    .cp-status { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-    .cp-stat { background: #f0f0f4; border-radius: 8px; padding: 14px; text-align: center; }
-    .cp-stat .val { font-size: 32px; font-weight: 600; color: #1a1a2e; line-height: 1.1; }
-    .cp-stat .lbl { font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: #7a7a8c; margin-top: 4px; }
-    .cp-stat.main { background: #1a1a2e; }
-    .cp-stat.main .val { color: #fff; }
-    .cp-stat.main .lbl { color: #b8b8cc; }
-    .cp-stat.pop .val { animation: cp-pop 0.35s ease-out; }
+    .cp-last {
+      background: #f0f0f4;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #7a7a8c;
+      min-height: 50px;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .cp-last .big { font-size: 26px; font-weight: 600; color: #1a1a2e; }
+    #cp-draw-btn { margin-bottom: 20px; }
+
+    .cp-levels { background: #f0f0f4; border-radius: 8px; padding: 14px; margin-bottom: 20px; }
+    .cp-levels .note { font-size: 12px; color: #7a7a8c; text-align: center; margin-bottom: 12px; }
+    .cp-levels-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .cp-levels-grid .field-label { margin-bottom: 6px; }
+    .cp-levels .calc-btn { margin-top: 14px; }
+
+    .cp-side {
+      border: 1px solid #d8d8e0;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 12px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .cp-side.active { border-color: #2563eb; box-shadow: 0 0 0 1px #2563eb; }
+    .cp-side-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+    .cp-side-head .name { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+    .cp-side-head .level { font-size: 12px; color: #7a7a8c; }
+    .cp-sum { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; text-align: center; margin-bottom: 12px; }
+    .cp-sum .op { font-size: 18px; color: #7a7a8c; padding: 0 4px; }
+    .cp-sum .val { font-size: 26px; font-weight: 600; color: #1a1a2e; line-height: 1.1; }
+    .cp-sum .lbl { font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: #7a7a8c; margin-top: 2px; }
+    .cp-sum .total { background: #1a1a2e; border-radius: 8px; padding: 6px 0; }
+    .cp-sum .total .val { color: #fff; }
+    .cp-sum .total .lbl { color: #b8b8cc; }
+    .cp-sum.pop .total .val { animation: cp-pop 0.35s ease-out; }
     @keyframes cp-pop { 0% { transform: scale(1.5); } 100% { transform: scale(1); } }
 
-    .cp-btn-row { display: grid; gap: 6px; margin-bottom: 20px; }
-    .cp-btn-row.spend { grid-template-columns: repeat(5, 1fr); }
-    .cp-btn-row.actions { grid-template-columns: repeat(3, 1fr); margin-bottom: 0; }
+    .cp-btn-row { display: grid; gap: 6px; }
+    .cp-btn-row.spend { grid-template-columns: repeat(5, 1fr) 1.3fr; }
+    .cp-btn-row.actions { grid-template-columns: 1fr 1fr; margin-top: 8px; }
     .cp-btn {
-      padding: 12px 4px;
+      padding: 11px 2px;
       border: 1px solid #c8c8d4;
       border-radius: 6px;
       background: #fff;
@@ -283,12 +311,10 @@
     .cp-btn.spend { border-color: #2563eb; color: #2563eb; font-size: 15px; }
     .cp-btn:disabled { opacity: 0.35; cursor: default; }
     .cp-btn:not(:disabled):active { transform: scale(0.96); }
-    #cp-draw-btn { margin-bottom: 20px; }
 
     .cp-log { list-style: none; margin-top: 20px; border-top: 1px solid #e8e8f0; padding-top: 12px; }
-    .cp-log li { font-size: 12px; color: #7a7a8c; padding: 3px 0; display: flex; justify-content: space-between; }
+    .cp-log li { font-size: 12px; color: #7a7a8c; padding: 3px 0; display: flex; justify-content: space-between; gap: 8px; }
     .cp-log li:first-child { color: #1a1a2e; }
-
     .hidden { display: none; }
   </style>
 </head>
@@ -459,46 +485,41 @@
       <!-- Command point section -->
       <div id="section-cp" class="hidden">
         <div class="section-title">Command Point Tracker</div>
-
-        <div class="field">
-          <div class="field-label">Side</div>
-          <div class="radio-group">
-            <label class="radio-item"><input type="radio" name="cp-side" value="US" checked onchange="cpSwitchSide()"><span>🇺🇸 US</span></label>
-            <label class="radio-item"><input type="radio" name="cp-side" value="Soviet" onchange="cpSwitchSide()"><span>🇷🇺 Soviet</span></label>
-          </div>
-        </div>
-
-        <div class="field">
-          <div class="field-label">CP Level</div>
-          <div class="select-wrap">
-            <select id="cp-level" onchange="cpSetLevel()"></select>
-            <div class="select-arrow">▼</div>
-          </div>
-        </div>
+        <div class="cp-turn" id="cp-turn"></div>
 
         <div class="field">
           <div class="field-label">Chits in Cup</div>
-          <div class="chit-grid" id="cp-chits"></div>
+          <div id="cp-chits"></div>
           <div class="cp-sub" id="cp-cup-summary"></div>
         </div>
 
-        <div class="cp-status">
-          <div class="cp-stat" id="cp-last-card"><div class="val" id="cp-last">–</div><div class="lbl">Last chit</div></div>
-          <div class="cp-stat main" id="cp-available-card"><div class="val" id="cp-available">0</div><div class="lbl">Available CP</div></div>
+        <div class="cp-levels" id="cp-levels">
+          <div class="note" id="cp-levels-note"></div>
+          <div class="cp-levels-grid">
+            <div>
+              <div class="field-label">🇺🇸 US CP</div>
+              <div class="select-wrap"><select id="cp-level-US" onchange="cpLevelChanged()"></select><div class="select-arrow">▼</div></div>
+            </div>
+            <div>
+              <div class="field-label">🇷🇺 Soviet CP</div>
+              <div class="select-wrap"><select id="cp-level-Soviet" onchange="cpLevelChanged()"></select><div class="select-arrow">▼</div></div>
+            </div>
+          </div>
+          <button class="calc-btn" id="cp-next-turn-btn" onclick="cpNextTurn()"></button>
         </div>
 
+        <div class="cp-last" id="cp-last"></div>
         <button class="calc-btn" id="cp-draw-btn" onclick="cpDraw()">Draw chit</button>
 
-        <div class="field-label">Spend CP</div>
-        <div class="cp-btn-row spend" id="cp-spend"></div>
+        <div id="cp-sides"></div>
 
         <div class="cp-btn-row actions">
           <button class="cp-btn" id="cp-undo-btn" onclick="cpUndo()">↶ Undo</button>
-          <button class="cp-btn" onclick="cpClearAvailable()">Clear CP</button>
-          <button class="cp-btn" onclick="cpReshuffle()">Reshuffle</button>
+          <button class="cp-btn" onclick="cpNewGame()">New game</button>
         </div>
 
         <ul class="cp-log" id="cp-log"></ul>
+      </div>
       </div>
 
     </div>
@@ -849,172 +870,220 @@
     }
   };
 
-  const CP_STORAGE_KEY = 'fireteam-cp-v1';
+  const CP_STORAGE_KEY = 'fireteam-cp-v2';
+  const CP_SIDES = ['US', 'Soviet'];
+  const CP_SIDE_LABEL = { US: '🇺🇸 US', Soviet: '🇷🇺 Soviet' };
   const CP_DEFAULT_LEVEL = 20;
-  const CP_LOG_LIMIT = 12;
+  const CP_LOG_LIMIT = 15;
   const CP_UNDO_LIMIT = 30;
 
-  // Per-side state: CP level, chits still in the cup (count per value 1–5),
-  // CP available to spend (drawn + saved from earlier draws), last drawn chit and a log.
-  let cpSide = 'US';
-  let cpState = {};
-  let cpUndoStack = { US: [], Soviet: [] };
+  // Both sides' chits share one cup. Each side's CP is split into `saved`
+  // (left over from earlier activations) and `drawn` (the chit just drawn);
+  // available CP = saved + drawn. When the cup is empty the turn ends and
+  // CP levels can be lowered for losses before the next turn's cup is filled.
+  let cp;
+  let cpUndoStack = [];
 
-  function cpMaxLevel(side) {
-    return Object.keys(CP_CHIT_CHARTS[side]).length;
-  }
-
-  function cpFreshSide(side, level) {
-    return { level, cup: [...CP_CHIT_CHARTS[side][level]], available: 0, last: null, log: [] };
+  function cpFreshGame(levels) {
+    return {
+      turn: 1,
+      levels: { ...levels },
+      cup: { US: [...CP_CHIT_CHARTS.US[levels.US]], Soviet: [...CP_CHIT_CHARTS.Soviet[levels.Soviet]] },
+      saved: { US: 0, Soviet: 0 },
+      drawn: { US: 0, Soviet: 0 },
+      last: null,
+      drawsThisTurn: 0,
+      log: []
+    };
   }
 
   function cpLoad() {
-    let saved = null;
-    try { saved = JSON.parse(localStorage.getItem(CP_STORAGE_KEY)); } catch (e) {}
-    for (const side of ['US', 'Soviet']) {
-      const s = saved && saved.sides && saved.sides[side];
-      cpState[side] = (s && CP_CHIT_CHARTS[side][s.level] && Array.isArray(s.cup))
-        ? s : cpFreshSide(side, CP_DEFAULT_LEVEL);
-    }
-    if (saved && CP_CHIT_CHARTS[saved.side]) cpSide = saved.side;
-    document.querySelector(`input[name="cp-side"][value="${cpSide}"]`).checked = true;
+    try {
+      const s = JSON.parse(localStorage.getItem(CP_STORAGE_KEY));
+      if (s && CP_SIDES.every(side => CP_CHIT_CHARTS[side][s.levels[side]] && Array.isArray(s.cup[side]))) cp = s;
+    } catch (e) {}
+    if (!cp) cp = cpFreshGame({ US: CP_DEFAULT_LEVEL, Soviet: CP_DEFAULT_LEVEL });
   }
 
   function cpSave() {
-    try { localStorage.setItem(CP_STORAGE_KEY, JSON.stringify({ side: cpSide, sides: cpState })); } catch (e) {}
+    try { localStorage.setItem(CP_STORAGE_KEY, JSON.stringify(cp)); } catch (e) {}
   }
 
   function cpCommit(change) {
-    const stack = cpUndoStack[cpSide];
-    stack.push(JSON.stringify(cpState[cpSide]));
-    if (stack.length > CP_UNDO_LIMIT) stack.shift();
-    change(cpState[cpSide]);
+    cpUndoStack.push(JSON.stringify(cp));
+    if (cpUndoStack.length > CP_UNDO_LIMIT) cpUndoStack.shift();
+    change(cp);
     cpSave();
     cpRender();
   }
 
-  function cpAddLog(st, text) {
-    st.log.unshift({ text, cp: st.available });
-    st.log.length = Math.min(st.log.length, CP_LOG_LIMIT);
+  function cpAddLog(text, side) {
+    const cpText = side ? `${side} ${cp.saved[side] + cp.drawn[side]} CP` : '';
+    cp.log.unshift({ text, cp: cpText });
+    cp.log.length = Math.min(cp.log.length, CP_LOG_LIMIT);
   }
 
-  function cpSwitchSide() {
-    cpSide = getVal('cp-side');
-    cpSave();
-    cpRender();
-  }
-
-  function cpSetLevel() {
-    const level = Number(document.getElementById('cp-level').value);
-    const st = cpState[cpSide];
-    const full = CP_CHIT_CHARTS[cpSide][st.level];
-    const touched = st.cup.some((n, i) => n !== full[i]);
-    if (touched && !confirm('Changing the CP level puts all chits back in the cup. Continue?')) {
-      document.getElementById('cp-level').value = st.level;
-      return;
-    }
-    cpCommit(s => {
-      s.level = level;
-      s.cup = [...CP_CHIT_CHARTS[cpSide][level]];
-      s.last = null;
-      cpAddLog(s, `CP level set to ${level}`);
-    });
-  }
+  const cpSum = arr => arr.reduce((a, b) => a + b, 0);
+  const cpCupChits = () => cpSum(cp.cup.US) + cpSum(cp.cup.Soviet);
 
   function cpDraw() {
-    const st = cpState[cpSide];
-    const total = st.cup.reduce((a, b) => a + b, 0);
-    if (total === 0) { cpReshuffle(); return; }
-    let r = Math.floor(Math.random() * total);
-    let value = 0;
-    while (r >= st.cup[value]) { r -= st.cup[value]; value++; }
+    // Each chit in the cup is equally likely, whichever side it belongs to.
+    const pool = [];
+    for (const side of CP_SIDES) cp.cup[side].forEach((n, i) => { for (let k = 0; k < n; k++) pool.push([side, i + 1]); });
+    if (!pool.length) return;
+    const [side, value] = pool[Math.floor(Math.random() * pool.length)];
     cpCommit(s => {
-      s.cup[value]--;
-      s.last = value + 1;
-      s.available += value + 1;
-      cpAddLog(s, `Drew chit ${value + 1}`);
+      // The previous activation is over: anything unspent is now saved.
+      for (const sd of CP_SIDES) { s.saved[sd] += s.drawn[sd]; s.drawn[sd] = 0; }
+      s.cup[side][value - 1]--;
+      s.drawn[side] = value;
+      s.last = { side, value };
+      s.drawsThisTurn++;
+      cpAddLog(`Drew ${side} ${value}`, side);
     });
-    cpPop('cp-last-card');
-    cpPop('cp-available-card');
-    speakResultText(`${value + 1} command point${value === 0 ? '' : 's'}`);
+    cpPop(side);
+    speakResultText(`${side === 'US' ? 'U S' : 'Soviet'}, ${value} command point${value === 1 ? '' : 's'}`);
   }
 
-  function cpSpend(amount) {
-    if (cpState[cpSide].available < amount) return;
+  function cpSpend(side, amount) {
+    if (cp.saved[side] + cp.drawn[side] < amount) return;
     cpCommit(s => {
-      s.available -= amount;
-      cpAddLog(s, `Spent ${amount}`);
+      // Use the freshly drawn CP first, then dip into savings.
+      const fromDrawn = Math.min(s.drawn[side], amount);
+      s.drawn[side] -= fromDrawn;
+      s.saved[side] -= amount - fromDrawn;
+      cpAddLog(`${side} spent ${amount}`, side);
     });
-    cpPop('cp-available-card');
+    cpPop(side);
   }
 
-  function cpClearAvailable() {
-    if (cpState[cpSide].available === 0) return;
+  function cpClear(side) {
+    const total = cp.saved[side] + cp.drawn[side];
+    if (!total) return;
     cpCommit(s => {
-      cpAddLog(s, `Discarded ${s.available}`);
-      s.available = 0;
-      s.log[0].cp = 0;
+      s.saved[side] = 0;
+      s.drawn[side] = 0;
+      cpAddLog(`${side} discarded ${total}`, side);
     });
   }
 
-  function cpReshuffle() {
+  function cpSelectedLevels() {
+    return { US: Number(document.getElementById('cp-level-US').value), Soviet: Number(document.getElementById('cp-level-Soviet').value) };
+  }
+
+  function cpLevelChanged() {
+    // Before the first draw of a turn the cup can be refilled right away;
+    // at the end of a turn the new levels apply when the next turn starts.
+    if (cp.drawsThisTurn > 0) return;
+    const levels = cpSelectedLevels();
     cpCommit(s => {
-      s.cup = [...CP_CHIT_CHARTS[cpSide][s.level]];
+      s.levels = levels;
+      s.cup = { US: [...CP_CHIT_CHARTS.US[levels.US]], Soviet: [...CP_CHIT_CHARTS.Soviet[levels.Soviet]] };
+      cpAddLog(`CP levels US ${levels.US} / Soviet ${levels.Soviet}`);
+    });
+  }
+
+  function cpNextTurn() {
+    const levels = cpSelectedLevels();
+    cpCommit(s => {
+      for (const sd of CP_SIDES) { s.saved[sd] += s.drawn[sd]; s.drawn[sd] = 0; }
+      s.turn++;
+      s.levels = levels;
+      s.cup = { US: [...CP_CHIT_CHARTS.US[levels.US]], Soviet: [...CP_CHIT_CHARTS.Soviet[levels.Soviet]] };
       s.last = null;
-      cpAddLog(s, 'All chits back in cup');
+      s.drawsThisTurn = 0;
+      cpAddLog(`Turn ${s.turn}: US ${levels.US} / Soviet ${levels.Soviet} CP`);
+    });
+  }
+
+  function cpNewGame() {
+    if (!confirm('Start a new game? Saved CP and the turn counter are reset.')) return;
+    cpCommit(s => {
+      Object.assign(s, cpFreshGame(s.levels));
+      cpAddLog(`New game: US ${s.levels.US} / Soviet ${s.levels.Soviet} CP`);
     });
   }
 
   function cpUndo() {
-    const prev = cpUndoStack[cpSide].pop();
+    const prev = cpUndoStack.pop();
     if (!prev) return;
-    cpState[cpSide] = JSON.parse(prev);
+    cp = JSON.parse(prev);
     cpSave();
     cpRender();
   }
 
-  function cpPop(id) {
-    const el = document.getElementById(id);
+  function cpPop(side) {
+    const el = document.getElementById(`cp-sum-${side}`);
+    if (!el) return;
     el.classList.remove('pop');
     void el.offsetWidth;
     el.classList.add('pop');
   }
 
   function cpRender() {
-    const st = cpState[cpSide];
-    const full = CP_CHIT_CHARTS[cpSide][st.level];
+    const chitsLeft = cpCupChits();
+    const turnOver = chitsLeft === 0;
+    const setup = cp.drawsThisTurn === 0;
 
-    const levelSelect = document.getElementById('cp-level');
-    const max = cpMaxLevel(cpSide);
-    if (levelSelect.options.length !== max) {
-      levelSelect.innerHTML = '';
-      for (let i = 1; i <= max; i++) levelSelect.add(new Option(String(i).padStart(2, '0'), i));
+    document.getElementById('cp-turn').textContent = `Turn ${cp.turn}`;
+
+    document.getElementById('cp-chits').innerHTML = CP_SIDES.map(side => {
+      const full = CP_CHIT_CHARTS[side][cp.levels[side]];
+      return `<div class="cp-cup-row"><div class="side">${CP_SIDE_LABEL[side]}</div>` +
+        cp.cup[side].map((n, i) => `
+          <div class="chit${n === 0 ? ' empty' : ''}">
+            <div class="face">${i + 1}</div>
+            <div class="count">${n}/${full[i]}</div>
+          </div>`).join('') + '</div>';
+    }).join('');
+    document.getElementById('cp-cup-summary').textContent = turnOver
+      ? 'All chits drawn – turn over'
+      : `${chitsLeft} chit${chitsLeft === 1 ? '' : 's'} left · US ${cp.cup.US.reduce((a, n, i) => a + n * (i + 1), 0)} / Soviet ${cp.cup.Soviet.reduce((a, n, i) => a + n * (i + 1), 0)} CP in cup`;
+
+    // CP levels: editable before the first draw, or after the last one for the next turn.
+    document.getElementById('cp-levels').classList.toggle('hidden', !(setup || turnOver));
+    document.getElementById('cp-levels-note').textContent = turnOver
+      ? 'Update CP levels for losses, then start the next turn.'
+      : 'Set CP levels before the first draw.';
+    document.getElementById('cp-next-turn-btn').classList.toggle('hidden', !turnOver);
+    document.getElementById('cp-next-turn-btn').textContent = `Start turn ${cp.turn + 1}`;
+    for (const side of CP_SIDES) {
+      const select = document.getElementById(`cp-level-${side}`);
+      const max = Object.keys(CP_CHIT_CHARTS[side]).length;
+      if (select.options.length !== max) {
+        for (let i = 1; i <= max; i++) select.add(new Option(String(i).padStart(2, '0'), i));
+      }
+      select.value = cp.levels[side];
     }
-    levelSelect.value = st.level;
 
-    document.getElementById('cp-chits').innerHTML = st.cup.map((n, i) => `
-      <div class="chit${n === 0 ? ' empty' : ''}">
-        <div class="face">${i + 1}</div>
-        <div class="count">${n} / ${full[i]}</div>
-      </div>`).join('');
+    document.getElementById('cp-last').innerHTML = cp.last
+      ? `<span>Last chit</span><span class="big">${CP_SIDE_LABEL[cp.last.side]} ${cp.last.value}</span>`
+      : '<span>No chit drawn yet this turn</span>';
+    document.getElementById('cp-draw-btn').classList.toggle('hidden', turnOver);
 
-    const chitsLeft = st.cup.reduce((a, b) => a + b, 0);
-    const cpLeft = st.cup.reduce((a, n, i) => a + n * (i + 1), 0);
-    document.getElementById('cp-cup-summary').textContent = chitsLeft
-      ? `${chitsLeft} chit${chitsLeft === 1 ? '' : 's'} left · ${cpLeft} / ${st.level} CP still in cup`
-      : 'Cup is empty';
+    document.getElementById('cp-sides').innerHTML = CP_SIDES.map(side => {
+      const total = cp.saved[side] + cp.drawn[side];
+      const active = cp.last && cp.last.side === side;
+      return `
+        <div class="cp-side${active ? ' active' : ''}">
+          <div class="cp-side-head"><span class="name">${CP_SIDE_LABEL[side]}</span><span class="level">CP level ${cp.levels[side]}</span></div>
+          <div class="cp-sum" id="cp-sum-${side}">
+            <div><div class="val">${cp.saved[side]}</div><div class="lbl">Saved</div></div>
+            <div class="op">+</div>
+            <div><div class="val">${cp.drawn[side]}</div><div class="lbl">Drawn</div></div>
+            <div class="op">=</div>
+            <div class="total"><div class="val">${total}</div><div class="lbl">Total</div></div>
+          </div>
+          <div class="cp-btn-row spend">
+            ${[1, 2, 3, 4, 5].map(n => `<button class="cp-btn spend" onclick="cpSpend('${side}', ${n})"${total < n ? ' disabled' : ''}>−${n}</button>`).join('')}
+            <button class="cp-btn" onclick="cpClear('${side}')"${total ? '' : ' disabled'}>Clear</button>
+          </div>
+        </div>`;
+    }).join('');
 
-    document.getElementById('cp-last').textContent = st.last ?? '–';
-    document.getElementById('cp-available').textContent = st.available;
-    document.getElementById('cp-draw-btn').textContent = chitsLeft ? 'Draw chit' : 'Cup empty – reshuffle';
-
-    document.getElementById('cp-spend').innerHTML = [1, 2, 3, 4, 5].map(n =>
-      `<button class="cp-btn spend" onclick="cpSpend(${n})"${st.available < n ? ' disabled' : ''}>−${n}</button>`
-    ).join('');
-    document.getElementById('cp-undo-btn').disabled = cpUndoStack[cpSide].length === 0;
-
-    document.getElementById('cp-log').innerHTML = st.log.map(e =>
-      `<li><span>${e.text}</span><span>${e.cp} CP</span></li>`
+    document.getElementById('cp-undo-btn').disabled = cpUndoStack.length === 0;
+    document.getElementById('cp-log').innerHTML = cp.log.map(e =>
+      `<li><span>${e.text}</span><span>${e.cp}</span></li>`
     ).join('');
   }
 
