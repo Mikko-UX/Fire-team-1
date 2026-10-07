@@ -1,6 +1,6 @@
 // Fire Team PWA service worker
 // Bump CACHE_VERSION whenever you change the app to force clients to update.
-const CACHE_VERSION = 'fireteam-v3';
+const CACHE_VERSION = 'fireteam-v5';
 const APP_SHELL = [
   '/',
   '/static/icon-192.png',

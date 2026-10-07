@@ -238,7 +238,7 @@
 
     /* ── Command points ── */
     .cp-turn { font-size: 12px; color: #7a7a8c; text-align: center; margin: -14px 0 18px; }
-    .cp-cup-row { display: grid; grid-template-columns: 64px repeat(5, 1fr); gap: 5px; align-items: center; margin-bottom: 6px; }
+    .cp-cup-row { display: grid; grid-template-columns: 58px repeat(6, 1fr); gap: 4px; align-items: center; margin-bottom: 6px; }
     .cp-cup-row .side { font-size: 12px; font-weight: 500; color: #1a1a2e; }
     .chit { background: #f0f0f4; border-radius: 8px; padding: 6px 2px; text-align: center; }
     .chit .face {
@@ -251,6 +251,10 @@
       font-size: 13px; font-weight: 600; color: #1a1a2e;
     }
     .chit.empty .face { border-color: #c8c8d4; color: #c8c8d4; }
+    .chit.arty .face { border-color: #b71c1c; color: #b71c1c; font-size: 10px; letter-spacing: 0.02em; }
+    .chit.arty.empty .face { border-color: #e8c8c8; color: #e8c8c8; }
+    .cp-last .big.arty { color: #b71c1c; }
+    .cp-levels-grid .arty-label { margin-top: 12px; }
     .chit .count { font-size: 11px; color: #7a7a8c; }
     .cp-sub { font-size: 12px; color: #7a7a8c; text-align: center; margin-top: 8px; }
 
@@ -265,7 +269,10 @@
       min-height: 50px;
       display: flex; align-items: center; justify-content: center; gap: 10px;
     }
+    .cp-last { flex-wrap: wrap; }
     .cp-last .big { font-size: 26px; font-weight: 600; color: #1a1a2e; }
+    .cp-last .streak { flex-basis: 100%; font-size: 12px; }
+    .cp-last .streak.limit { color: #b71c1c; font-weight: 500; }
     #cp-draw-btn { margin-bottom: 20px; }
 
     .cp-levels { background: #f0f0f4; border-radius: 8px; padding: 14px; margin-bottom: 20px; }
@@ -284,7 +291,9 @@
     .cp-side.active { border-color: #2563eb; box-shadow: 0 0 0 1px #2563eb; }
     .cp-side-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
     .cp-side-head .name { font-size: 14px; font-weight: 600; color: #1a1a2e; }
-    .cp-side-head .level { font-size: 12px; color: #7a7a8c; }
+    .cp-side-head { gap: 8px; }
+    .cp-side-head .level { font-size: 12px; color: #7a7a8c; margin-left: auto; }
+    .cp-btn.clear { padding: 4px 10px; font-size: 12px; }
     .cp-sum { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; text-align: center; margin-bottom: 12px; }
     .cp-sum .op { font-size: 18px; color: #7a7a8c; padding: 0 4px; }
     .cp-sum .val { font-size: 26px; font-weight: 600; color: #1a1a2e; line-height: 1.1; }
@@ -296,7 +305,7 @@
     @keyframes cp-pop { 0% { transform: scale(1.5); } 100% { transform: scale(1); } }
 
     .cp-btn-row { display: grid; gap: 6px; }
-    .cp-btn-row.spend { grid-template-columns: repeat(5, 1fr) 1.3fr; }
+    .cp-btn-row.spend { grid-template-columns: repeat(6, 1fr); }
     .cp-btn-row.actions { grid-template-columns: 1fr 1fr; margin-top: 8px; }
     .cp-btn {
       padding: 11px 2px;
@@ -499,10 +508,14 @@
             <div>
               <div class="field-label">🇺🇸 US CP</div>
               <div class="select-wrap"><select id="cp-level-US" onchange="cpLevelChanged()"></select><div class="select-arrow">▼</div></div>
+              <div class="field-label arty-label">US artillery</div>
+              <div class="select-wrap"><select id="cp-arty-US" onchange="cpLevelChanged()"></select><div class="select-arrow">▼</div></div>
             </div>
             <div>
               <div class="field-label">🇷🇺 Soviet CP</div>
               <div class="select-wrap"><select id="cp-level-Soviet" onchange="cpLevelChanged()"></select><div class="select-arrow">▼</div></div>
+              <div class="field-label arty-label">Soviet artillery</div>
+              <div class="select-wrap"><select id="cp-arty-Soviet" onchange="cpLevelChanged()"></select><div class="select-arrow">▼</div></div>
             </div>
           </div>
           <button class="calc-btn" id="cp-next-turn-btn" onclick="cpNextTurn()"></button>
@@ -876,6 +889,17 @@
   const CP_DEFAULT_LEVEL = 20;
   const CP_LOG_LIMIT = 15;
   const CP_UNDO_LIMIT = 30;
+  const CP_MAX_ARTY = 10;
+
+  // How many chits of the same side may be drawn in a row, by that side's CP level.
+  function cpMaxStreak(level) {
+    if (level <= 10) return 1;
+    if (level <= 20) return 2;
+    if (level <= 30) return 3;
+    if (level <= 40) return 4;
+    if (level <= 60) return 5;
+    return 6;
+  }
 
   // Both sides' chits share one cup. Each side's CP is split into `saved`
   // (left over from earlier activations) and `drawn` (the chit just drawn);
@@ -884,17 +908,27 @@
   let cp;
   let cpUndoStack = [];
 
-  function cpFreshGame(levels) {
-    return {
+  // Artillery battery chits (0–10 per side) go in the cup alongside the CP chits.
+  // They trigger a barrage, carry no CP and are ignored by the in-a-row rule.
+  function cpFillCup(s) {
+    s.cup = { US: [...CP_CHIT_CHARTS.US[s.levels.US]], Soviet: [...CP_CHIT_CHARTS.Soviet[s.levels.Soviet]] };
+    s.artyCup = { ...s.arty };
+  }
+
+  function cpFreshGame(levels, arty = { US: 0, Soviet: 0 }) {
+    const s = {
       turn: 1,
       levels: { ...levels },
-      cup: { US: [...CP_CHIT_CHARTS.US[levels.US]], Soviet: [...CP_CHIT_CHARTS.Soviet[levels.Soviet]] },
+      arty: { ...arty },
       saved: { US: 0, Soviet: 0 },
       drawn: { US: 0, Soviet: 0 },
       last: null,
+      streak: null,
       drawsThisTurn: 0,
       log: []
     };
+    cpFillCup(s);
+    return s;
   }
 
   function cpLoad() {
@@ -903,6 +937,7 @@
       if (s && CP_SIDES.every(side => CP_CHIT_CHARTS[side][s.levels[side]] && Array.isArray(s.cup[side]))) cp = s;
     } catch (e) {}
     if (!cp) cp = cpFreshGame({ US: CP_DEFAULT_LEVEL, Soviet: CP_DEFAULT_LEVEL });
+    if (!cp.arty) { cp.arty = { US: 0, Soviet: 0 }; cp.artyCup = { US: 0, Soviet: 0 }; }
   }
 
   function cpSave() {
@@ -918,31 +953,68 @@
   }
 
   function cpAddLog(text, side) {
-    const cpText = side ? `${side} ${cp.saved[side] + cp.drawn[side]} CP` : '';
+    const cpText = side ? `${side} ${cpFmt(cp.saved[side] + cp.drawn[side])} CP` : '';
     cp.log.unshift({ text, cp: cpText });
     cp.log.length = Math.min(cp.log.length, CP_LOG_LIMIT);
   }
 
+  // CP can be spent in halves, so show 2.5 as "2½".
+  const cpFmt = v => (v % 1 ? `${Math.floor(v) || ''}½` : String(v));
   const cpSum = arr => arr.reduce((a, b) => a + b, 0);
-  const cpCupChits = () => cpSum(cp.cup.US) + cpSum(cp.cup.Soviet);
+  const cpCupArty = () => cp.artyCup.US + cp.artyCup.Soviet;
+  const cpCupChits = () => cpSum(cp.cup.US) + cpSum(cp.cup.Soviet) + cpCupArty();
+
+  // The side that has hit its in-a-row limit and may not be drawn next.
+  function cpBlockedSide() {
+    const st = cp.streak;
+    return st && st.count >= cpMaxStreak(cp.levels[st.side]) ? st.side : null;
+  }
+
+  // The turn ends when the cup is empty, or when the only CP chits left belong to
+  // the side that has hit its in-a-row limit. Remaining chits, artillery included,
+  // are lost for this turn. Artillery alone keeps the turn going until drawn.
+  function cpTurnOver() {
+    const blocked = cpBlockedSide();
+    const eligible = CP_SIDES.reduce((a, sd) => a + (sd === blocked ? 0 : cpSum(cp.cup[sd])), 0);
+    const blockedLeft = blocked ? cpSum(cp.cup[blocked]) : 0;
+    return eligible === 0 && (blockedLeft > 0 || cpCupArty() === 0);
+  }
 
   function cpDraw() {
-    // Each chit in the cup is equally likely, whichever side it belongs to.
+    if (cpTurnOver()) return;
+    // Each eligible chit in the cup is equally likely, whichever side it belongs to.
+    // Value 0 marks an artillery chit; those are always eligible.
+    const blocked = cpBlockedSide();
     const pool = [];
-    for (const side of CP_SIDES) cp.cup[side].forEach((n, i) => { for (let k = 0; k < n; k++) pool.push([side, i + 1]); });
+    for (const side of CP_SIDES) {
+      for (let k = 0; k < cp.artyCup[side]; k++) pool.push([side, 0]);
+      if (side === blocked) continue;
+      cp.cup[side].forEach((n, i) => { for (let k = 0; k < n; k++) pool.push([side, i + 1]); });
+    }
     if (!pool.length) return;
     const [side, value] = pool[Math.floor(Math.random() * pool.length)];
+    const arty = value === 0;
     cpCommit(s => {
       // The previous activation is over: anything unspent is now saved.
       for (const sd of CP_SIDES) { s.saved[sd] += s.drawn[sd]; s.drawn[sd] = 0; }
-      s.cup[side][value - 1]--;
-      s.drawn[side] = value;
-      s.last = { side, value };
+      if (arty) {
+        s.artyCup[side]--;
+        s.last = { side, arty: true };
+        cpAddLog(`Drew ${side} artillery barrage`, side);
+      } else {
+        s.cup[side][value - 1]--;
+        s.drawn[side] = value;
+        s.last = { side, value };
+        s.streak = s.streak && s.streak.side === side ? { side, count: s.streak.count + 1 } : { side, count: 1 };
+        cpAddLog(`Drew ${side} ${value}`, side);
+      }
       s.drawsThisTurn++;
-      cpAddLog(`Drew ${side} ${value}`, side);
+      const unused = cpCupChits();
+      if (unused && cpTurnOver()) cpAddLog(`${s.streak.side} limit reached – turn over, ${unused} chit${unused === 1 ? '' : 's'} unused`);
     });
     cpPop(side);
-    speakResultText(`${side === 'US' ? 'U S' : 'Soviet'}, ${value} command point${value === 1 ? '' : 's'}`);
+    const sideName = side === 'US' ? 'U S' : 'Soviet';
+    speakResultText(arty ? `${sideName}, artillery barrage` : `${sideName}, ${value} command point${value === 1 ? '' : 's'}`);
   }
 
   function cpSpend(side, amount) {
@@ -952,7 +1024,7 @@
       const fromDrawn = Math.min(s.drawn[side], amount);
       s.drawn[side] -= fromDrawn;
       s.saved[side] -= amount - fromDrawn;
-      cpAddLog(`${side} spent ${amount}`, side);
+      cpAddLog(`${side} spent ${cpFmt(amount)}`, side);
     });
     cpPop(side);
   }
@@ -963,7 +1035,7 @@
     cpCommit(s => {
       s.saved[side] = 0;
       s.drawn[side] = 0;
-      cpAddLog(`${side} discarded ${total}`, side);
+      cpAddLog(`${side} discarded ${cpFmt(total)}`, side);
     });
   }
 
@@ -971,36 +1043,47 @@
     return { US: Number(document.getElementById('cp-level-US').value), Soviet: Number(document.getElementById('cp-level-Soviet').value) };
   }
 
+  function cpSelectedArty() {
+    return { US: Number(document.getElementById('cp-arty-US').value), Soviet: Number(document.getElementById('cp-arty-Soviet').value) };
+  }
+
+  const cpSetupText = s => `US ${s.levels.US} CP + ${s.arty.US} art. / Soviet ${s.levels.Soviet} CP + ${s.arty.Soviet} art.`;
+
   function cpLevelChanged() {
     // Before the first draw of a turn the cup can be refilled right away;
     // at the end of a turn the new levels apply when the next turn starts.
     if (cp.drawsThisTurn > 0) return;
     const levels = cpSelectedLevels();
+    const arty = cpSelectedArty();
     cpCommit(s => {
       s.levels = levels;
-      s.cup = { US: [...CP_CHIT_CHARTS.US[levels.US]], Soviet: [...CP_CHIT_CHARTS.Soviet[levels.Soviet]] };
-      cpAddLog(`CP levels US ${levels.US} / Soviet ${levels.Soviet}`);
+      s.arty = arty;
+      cpFillCup(s);
+      cpAddLog(cpSetupText(s));
     });
   }
 
   function cpNextTurn() {
     const levels = cpSelectedLevels();
+    const arty = cpSelectedArty();
     cpCommit(s => {
       for (const sd of CP_SIDES) { s.saved[sd] += s.drawn[sd]; s.drawn[sd] = 0; }
       s.turn++;
       s.levels = levels;
-      s.cup = { US: [...CP_CHIT_CHARTS.US[levels.US]], Soviet: [...CP_CHIT_CHARTS.Soviet[levels.Soviet]] };
+      s.arty = arty;
+      cpFillCup(s);
       s.last = null;
+      s.streak = null;
       s.drawsThisTurn = 0;
-      cpAddLog(`Turn ${s.turn}: US ${levels.US} / Soviet ${levels.Soviet} CP`);
+      cpAddLog(`Turn ${s.turn}: ${cpSetupText(s)}`);
     });
   }
 
   function cpNewGame() {
     if (!confirm('Start a new game? Saved CP and the turn counter are reset.')) return;
     cpCommit(s => {
-      Object.assign(s, cpFreshGame(s.levels));
-      cpAddLog(`New game: US ${s.levels.US} / Soviet ${s.levels.Soviet} CP`);
+      Object.assign(s, cpFreshGame(s.levels, s.arty));
+      cpAddLog(`New game: ${cpSetupText(s)}`);
     });
   }
 
@@ -1022,7 +1105,7 @@
 
   function cpRender() {
     const chitsLeft = cpCupChits();
-    const turnOver = chitsLeft === 0;
+    const turnOver = cpTurnOver();
     const setup = cp.drawsThisTurn === 0;
 
     document.getElementById('cp-turn').textContent = `Turn ${cp.turn}`;
@@ -1034,11 +1117,18 @@
           <div class="chit${n === 0 ? ' empty' : ''}">
             <div class="face">${i + 1}</div>
             <div class="count">${n}/${full[i]}</div>
-          </div>`).join('') + '</div>';
+          </div>`).join('') + `
+          <div class="chit arty${cp.artyCup[side] === 0 ? ' empty' : ''}">
+            <div class="face">ART</div>
+            <div class="count">${cp.artyCup[side]}/${cp.arty[side]}</div>
+          </div></div>`;
     }).join('');
     document.getElementById('cp-cup-summary').textContent = turnOver
-      ? 'All chits drawn – turn over'
-      : `${chitsLeft} chit${chitsLeft === 1 ? '' : 's'} left · US ${cp.cup.US.reduce((a, n, i) => a + n * (i + 1), 0)} / Soviet ${cp.cup.Soviet.reduce((a, n, i) => a + n * (i + 1), 0)} CP in cup`;
+      ? (chitsLeft
+        ? `${cp.streak.side} in-a-row limit reached, no other chits left – turn over (${chitsLeft} chit${chitsLeft === 1 ? '' : 's'} unused)`
+        : 'All chits drawn – turn over')
+      : `${chitsLeft} chit${chitsLeft === 1 ? '' : 's'} left · US ${cp.cup.US.reduce((a, n, i) => a + n * (i + 1), 0)} / Soviet ${cp.cup.Soviet.reduce((a, n, i) => a + n * (i + 1), 0)} CP in cup` +
+        (cpCupArty() ? ` · ${cpCupArty()} artillery` : '');
 
     // CP levels: editable before the first draw, or after the last one for the next turn.
     document.getElementById('cp-levels').classList.toggle('hidden', !(setup || turnOver));
@@ -1054,10 +1144,26 @@
         for (let i = 1; i <= max; i++) select.add(new Option(String(i).padStart(2, '0'), i));
       }
       select.value = cp.levels[side];
+      const artySelect = document.getElementById(`cp-arty-${side}`);
+      if (!artySelect.options.length) {
+        for (let i = 0; i <= CP_MAX_ARTY; i++) artySelect.add(new Option(String(i), i));
+      }
+      artySelect.value = cp.arty[side];
     }
 
+    let streakHtml = '';
+    if (cp.streak && !turnOver) {
+      const { side, count } = cp.streak;
+      const max = cpMaxStreak(cp.levels[side]);
+      const other = CP_SIDES.find(sd => sd !== side);
+      streakHtml = cpBlockedSide()
+        ? `<span class="streak limit">${side} ${count}/${max} in a row – next chit is ${other}</span>`
+        : `<span class="streak">${side} ${count}/${max} in a row</span>`;
+    }
     document.getElementById('cp-last').innerHTML = cp.last
-      ? `<span>Last chit</span><span class="big">${CP_SIDE_LABEL[cp.last.side]} ${cp.last.value}</span>`
+      ? (cp.last.arty
+        ? `<span>Last chit</span><span class="big arty">${CP_SIDE_LABEL[cp.last.side]} 💥 Artillery</span>${streakHtml}`
+        : `<span>Last chit</span><span class="big">${CP_SIDE_LABEL[cp.last.side]} ${cp.last.value}</span>${streakHtml}`)
       : '<span>No chit drawn yet this turn</span>';
     document.getElementById('cp-draw-btn').classList.toggle('hidden', turnOver);
 
@@ -1066,17 +1172,17 @@
       const active = cp.last && cp.last.side === side;
       return `
         <div class="cp-side${active ? ' active' : ''}">
-          <div class="cp-side-head"><span class="name">${CP_SIDE_LABEL[side]}</span><span class="level">CP level ${cp.levels[side]}</span></div>
+          <div class="cp-side-head"><span class="name">${CP_SIDE_LABEL[side]}</span><span class="level">CP ${cp.levels[side]} · max ${cpMaxStreak(cp.levels[side])} in a row</span>
+            <button class="cp-btn clear" onclick="cpClear('${side}')"${total ? '' : ' disabled'}>Clear</button></div>
           <div class="cp-sum" id="cp-sum-${side}">
-            <div><div class="val">${cp.saved[side]}</div><div class="lbl">Saved</div></div>
+            <div><div class="val">${cpFmt(cp.saved[side])}</div><div class="lbl">Saved</div></div>
             <div class="op">+</div>
-            <div><div class="val">${cp.drawn[side]}</div><div class="lbl">Drawn</div></div>
+            <div><div class="val">${cpFmt(cp.drawn[side])}</div><div class="lbl">Drawn</div></div>
             <div class="op">=</div>
-            <div class="total"><div class="val">${total}</div><div class="lbl">Total</div></div>
+            <div class="total"><div class="val">${cpFmt(total)}</div><div class="lbl">Total</div></div>
           </div>
           <div class="cp-btn-row spend">
-            ${[1, 2, 3, 4, 5].map(n => `<button class="cp-btn spend" onclick="cpSpend('${side}', ${n})"${total < n ? ' disabled' : ''}>−${n}</button>`).join('')}
-            <button class="cp-btn" onclick="cpClear('${side}')"${total ? '' : ' disabled'}>Clear</button>
+            ${[0.5, 1, 2, 3, 4, 5].map(n => `<button class="cp-btn spend" onclick="cpSpend('${side}', ${n})"${total < n ? ' disabled' : ''}>−${cpFmt(n)}</button>`).join('')}
           </div>
         </div>`;
     }).join('');
