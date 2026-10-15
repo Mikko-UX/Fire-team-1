@@ -152,15 +152,15 @@ WEAPONS_DB: List[WeaponData] = [
                range_bands=[RangeBand(1, 0, 5), RangeBand(2, 6, 7), RangeBand(3, 8, 9), RangeBand(4, 10, 11), RangeBand(5, 12, 13)],
                hv_front_armor=2, hv_flank_armor=1, ht_front_armor=2, ht_flank_armor=1),
 
-    WeaponData("T-80", "Soviet", "GUN", firepower_hv=10, ammo_type="HV",
+    WeaponData("T-80", "Soviet", "GUN", firepower_hv=17, firepower_ht=10, ammo_type="HV",
                range_bands=[RangeBand(1, 0, 7), RangeBand(2, 8, 9), RangeBand(3, 10, 11), RangeBand(4, 12, 13), RangeBand(5, 14, 15), RangeBand(6, 16, 18), RangeBand(7, 19, 21), RangeBand(8, 22, 25)],
-               hv_front_armor=11, hv_flank_armor=4, ht_front_armor=11, ht_flank_armor=4),
+               hv_front_armor=10, hv_flank_armor=4, ht_front_armor=11, ht_flank_armor=4),
 
-    WeaponData("T-72", "Soviet", "GUN", firepower_hv=9, ammo_type="HV",
+    WeaponData("T-72", "Soviet", "GUN", firepower_hv=17, firepower_ht=10, ammo_type="HV",
                range_bands=[RangeBand(1, 0, 7), RangeBand(2, 8, 11), RangeBand(3, 12, 14), RangeBand(4, 15, 16), RangeBand(5, 17, 19), RangeBand(6, 20, 21), RangeBand(7, 22, 23), RangeBand(8, 24, 26)],
                hv_front_armor=10, hv_flank_armor=4, ht_front_armor=11, ht_flank_armor=4),
 
-    WeaponData("T-62", "Soviet", "GUN", firepower_hv=14, ammo_type="HV",
+    WeaponData("T-62", "Soviet", "GUN", firepower_hv=14, firepower_ht=9, ammo_type="HV",
                range_bands=[RangeBand(1, 0, 5), RangeBand(2, 6, 7), RangeBand(3, 8, 9), RangeBand(4, 10, 10), RangeBand(5, 11, 12), RangeBand(6, 13, 14), RangeBand(7, 15, 17), RangeBand(8, 18, 20)],
                hv_front_armor=4, hv_flank_armor=2, ht_front_armor=8, ht_flank_armor=3),
 
@@ -179,14 +179,14 @@ WEAPONS_DB: List[WeaponData] = [
     # ============================================================
     # FINNISH WEAPONS
     # ============================================================
-    WeaponData("T-72", "FIN", "GUN", firepower_hv=17, ammo_type="HV",
+    WeaponData("T-72", "FIN", "GUN", firepower_hv=17, firepower_ht=10, ammo_type="HV",
                range_bands=[RangeBand(1, 0, 7), RangeBand(2, 8, 11), RangeBand(3, 12, 14), RangeBand(4, 15, 16), RangeBand(5, 17, 19), RangeBand(6, 20, 21), RangeBand(7, 22, 23), RangeBand(8, 24, 26)],
                hv_front_armor=10, hv_flank_armor=4, ht_front_armor=11, ht_flank_armor=4),
     
-    WeaponData("Leopard 2", "FIN", "GUN", firepower_hv=18, ammo_type="HV",
+    WeaponData("Leopard 2", "FIN", "GUN", firepower_hv=18, firepower_ht=10, ammo_type="HV",
                range_bands=[RangeBand(1, 0, 7), RangeBand(2, 8, 11), RangeBand(3, 12, 14), RangeBand(4, 15, 18),
                            RangeBand(5, 19, 21), RangeBand(6, 22, 26), RangeBand(7, 27, 32)],
-               hv_front_armor=10, hv_flank_armor=5, ht_front_armor=12, ht_flank_armor=6),
+               hv_front_armor=12, hv_flank_armor=6, ht_front_armor=10, ht_flank_armor=5),
     
     WeaponData("CV90C", "FIN", "GUN", firepower_hv=9, firepower_ht=3, ammo_type="HV",
                range_bands=[RangeBand(1, 0, 5), RangeBand(2, 6, 7), RangeBand(3, 8, 9), RangeBand(4, 10, 11),
@@ -230,11 +230,14 @@ WEAPONS_DB: List[WeaponData] = [
                hv_front_armor=0, hv_flank_armor=0, ht_front_armor=0, ht_flank_armor=0),
 ]
 
-_WEAPONS_BY_NAME: Dict[str, WeaponData] = {w.name: w for w in WEAPONS_DB}
-_SORTED_WEAPON_NAMES: List[str] = sorted(w.name for w in WEAPONS_DB)
+# Several sides share weapon names (T-72, BMP-1, Heli RKT, ...), so look weapons up by side and name.
+_WEAPONS_BY_SIDE_AND_NAME: Dict[tuple, WeaponData] = {(w.side, w.name): w for w in WEAPONS_DB}
+_SORTED_WEAPON_NAMES: List[str] = sorted({w.name for w in WEAPONS_DB})
 
-def get_weapon_by_name(name: str) -> Optional[WeaponData]:
-    return _WEAPONS_BY_NAME.get(name)
+def get_weapon_by_name(name: str, side: Optional[str] = None) -> Optional[WeaponData]:
+    if side:
+        return _WEAPONS_BY_SIDE_AND_NAME.get((side, name))
+    return next((w for w in WEAPONS_DB if w.name == name), None)
 
 def get_all_weapon_names() -> List[str]:
     return _SORTED_WEAPON_NAMES
@@ -298,8 +301,12 @@ class KillResult(NamedTuple):
     firepower: int
     armor: int
 
-def kill_number(weapon: WeaponData, target: WeaponData, target_side: Literal["Front", "Flank"], range_hexes: int, column_shifts: int, leadership: int, fear: int, shooter_modifiers: int = 0, target_modifiers: int = 0) -> KillResult:
-    if weapon.ammo_type == "HT" or weapon.wtype in ("MSL", "SAM", "RKT"):
+def kill_number(weapon: WeaponData, target: WeaponData, target_side: Literal["Front", "Flank"], range_hexes: int, column_shifts: int, leadership: int, fear: int, shooter_modifiers: int = 0, target_modifiers: int = 0, ammo_choice: Optional[str] = None) -> KillResult:
+    # Guns that carry both HV and HT rounds fire whichever the player picks (HV by default).
+    use_ht = weapon.ammo_type == "HT" or weapon.wtype in ("MSL", "SAM", "RKT")
+    if weapon.wtype == "GUN" and weapon.firepower_hv is not None and weapon.firepower_ht is not None and ammo_choice in ("HV", "HT"):
+        use_ht = ammo_choice == "HT"
+    if use_ht:
         ammo = "HT"
         firepower = weapon.firepower_ht if weapon.firepower_ht else 0
         armor = target.ht_front_armor if target_side == "Front" else target.ht_flank_armor
@@ -568,7 +575,9 @@ async def get_weapons():
         weapon_data.append({
             "name": weapon.name,
             "country": weapon.side,
-            "type": weapon.wtype
+            "type": weapon.wtype,
+            "firepower_hv": weapon.firepower_hv,
+            "firepower_ht": weapon.firepower_ht
         })
     return {"weapons": weapon_data}
 
@@ -582,14 +591,17 @@ async def calculate_vehicle_combat(
     leadership: int = Form(...),
     fear: int = Form(...),
     shooter_modifiers: int = Form(0),
-    target_modifiers: int = Form(0)
+    target_modifiers: int = Form(0),
+    ammo: str = Form(""),
+    shooter_country: str = Form(""),
+    target_country: str = Form("")
 ):
-    shooter = get_weapon_by_name(shooter_weapon)
-    target = get_weapon_by_name(target_weapon)
+    shooter = get_weapon_by_name(shooter_weapon, shooter_country or None)
+    target = get_weapon_by_name(target_weapon, target_country or None)
     if not shooter or not target:
         return {"error": "Invalid weapon"}
     
-    result = kill_number(shooter, target, target_side, range_hexes, column_shifts, leadership, fear, shooter_modifiers, target_modifiers)
+    result = kill_number(shooter, target, target_side, range_hexes, column_shifts, leadership, fear, shooter_modifiers, target_modifiers, ammo or None)
 
     import random
     die_roll = random.randint(1, 10)

@@ -218,6 +218,37 @@
     .result-card.hit .lbl { color: #388e3c; }
     .result-card.miss .lbl { color: #c62828; }
 
+    /* ── Dice roll ── */
+    .dice-stage { display: flex; justify-content: center; margin-bottom: 16px; }
+    .die {
+      width: 64px; height: 64px;
+      border-radius: 14px;
+      background: #1a1a2e;
+      color: #fff;
+      font-size: 30px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 10px rgba(26, 26, 46, 0.25), inset 0 -4px 0 rgba(0, 0, 0, 0.25);
+    }
+    .die.rolling { animation: die-tumble 0.18s linear infinite; }
+    .die.landed { animation: die-land 0.3s ease-out; }
+    @keyframes die-tumble {
+      0%   { transform: translate(0, 0) rotate(0deg); }
+      25%  { transform: translate(-6px, -8px) rotate(90deg); }
+      50%  { transform: translate(5px, -3px) rotate(180deg); }
+      75%  { transform: translate(-3px, -6px) rotate(270deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+    @keyframes die-land {
+      0%   { transform: scale(1.35); }
+      60%  { transform: scale(0.92); }
+      100% { transform: scale(1); }
+    }
+    #result-content.revealed { animation: result-in 0.25s ease-out; }
+    @keyframes result-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) {
+      .die.rolling, .die.landed, #result-content.revealed { animation: none; }
+    }
+
     /* ── Button ── */
     .calc-btn {
       width: 100%;
@@ -235,6 +266,7 @@
     }
     .calc-btn:hover { background: #2a2a4e; }
     .calc-btn:active { transform: scale(0.98); }
+    .calc-btn:disabled { opacity: 0.6; cursor: default; }
 
     /* ── Command points ── */
     .cp-turn { font-size: 12px; color: #7a7a8c; text-align: center; margin: -14px 0 18px; }
@@ -357,11 +389,19 @@
         <div class="field">
           <div class="field-label">Shooter Weapon</div>
           <div class="select-wrap">
-            <select id="shooter_weapon" required>
+            <select id="shooter_weapon" required onchange="updateAmmoChoice()">
               <option value="">— select weapon —</option>
               <!-- Weapons will be populated by JavaScript -->
             </select>
             <div class="select-arrow">▼</div>
+          </div>
+        </div>
+
+        <div class="field hidden" id="ammo-field">
+          <div class="field-label">Ammo</div>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="ammo" value="HV" checked><span id="ammo-hv-label">HV</span></label>
+            <label class="radio-item"><input type="radio" name="ammo" value="HT"><span id="ammo-ht-label">HT</span></label>
           </div>
         </div>
 
@@ -533,7 +573,6 @@
 
         <ul class="cp-log" id="cp-log"></ul>
       </div>
-      </div>
 
     </div>
   </div>
@@ -541,6 +580,7 @@
   <!-- Result -->
   <div class="result-box" id="result-box">
     <div class="result-title">Result</div>
+    <div class="dice-stage hidden" id="dice-stage"><div class="die" id="die">?</div></div>
     <div id="result-content">
       <!-- Results will be displayed here -->
     </div>
@@ -574,6 +614,21 @@
       const targetWeapons = weapons.filter(w => w.country === targetCountry && !excludedTargetTypes.includes(w.type));
       populateSelect('shooter_weapon', shooterWeapons);
       populateSelect('target_weapon', targetWeapons);
+      updateAmmoChoice();
+    }
+  }
+
+  // Show the HV/HT choice only for guns that have firepower for both; HV is the default.
+  function updateAmmoChoice() {
+    const shooterCountry = document.querySelector('input[name="shooter-country"]:checked').value;
+    const name = document.getElementById('shooter_weapon').value;
+    const w = weapons.find(x => x.country === shooterCountry && x.name === name);
+    const both = w && w.type === 'GUN' && w.firepower_hv != null && w.firepower_ht != null;
+    document.getElementById('ammo-field').classList.toggle('hidden', !both);
+    document.querySelector('input[name="ammo"][value="HV"]').checked = true;
+    if (both) {
+      document.getElementById('ammo-hv-label').textContent = `HV (${w.firepower_hv})`;
+      document.getElementById('ammo-ht-label').textContent = `HT (${w.firepower_ht})`;
     }
   }
 
@@ -603,6 +658,7 @@
     document.getElementById('btn-cp').classList.toggle('active', section === 'cp');
     document.getElementById('roll-btn').classList.toggle('hidden', section === 'cp');
     document.getElementById('result-box').classList.remove('visible');
+    document.getElementById('dice-stage').classList.add('hidden');
   }
 
   function getVal(name) {
@@ -763,7 +819,69 @@
     }
   }
 
+  let diceRolling = false;
+
+  // Short rattle: a few clacks that slow down, then a heavier landing knock.
+  function playDiceSound(duration) {
+    const ctx = getAudioContext();
+    const clack = (t, freq, level, len) => {
+      const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * len), ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 4);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = freq;
+      filter.Q.value = 3;
+      const gain = ctx.createGain();
+      gain.gain.value = level;
+      src.connect(filter).connect(gain).connect(ctx.destination);
+      src.start(t);
+    };
+    const start = ctx.currentTime;
+    let t = 0, gap = 0.04;
+    while (t < duration - 0.05) {
+      clack(start + t, 2200 + Math.random() * 2200, 0.5, 0.025);
+      t += gap;
+      gap *= 1.25;
+    }
+    clack(start + duration, 900, 1.2, 0.06);
+  }
+
+  // Tumble the die through random faces, then land on the real roll.
+  function animateDiceRoll(finalValue) {
+    const stage = document.getElementById('dice-stage');
+    const die = document.getElementById('die');
+    const content = document.getElementById('result-content');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const duration = reduced ? 0.15 : 0.7;
+    document.getElementById('result-box').classList.add('visible');
+    stage.classList.remove('hidden');
+    content.classList.add('hidden');
+    content.classList.remove('revealed');
+    die.classList.remove('landed');
+    die.classList.add('rolling');
+    playDiceSound(duration);
+    return new Promise(resolve => {
+      const ticker = setInterval(() => { die.textContent = 1 + Math.floor(Math.random() * 10); }, 60);
+      setTimeout(() => {
+        clearInterval(ticker);
+        die.textContent = finalValue;
+        die.classList.remove('rolling');
+        void die.offsetWidth;
+        die.classList.add('landed');
+        content.classList.remove('hidden');
+        content.classList.add('revealed');
+        resolve();
+      }, duration * 1000);
+    });
+  }
+
   async function calculate() {
+    if (diceRolling) return;
+    // Unlock audio inside the click so the rattle also plays on iOS.
+    getAudioContext();
     const s = activeSection;
     let formData;
     let endpoint;
@@ -774,6 +892,8 @@
       formData = new FormData();
       formData.append('shooter_weapon', document.getElementById('shooter_weapon').value);
       formData.append('target_weapon', document.getElementById('target_weapon').value);
+      formData.append('shooter_country', getVal('shooter-country'));
+      formData.append('target_country', getVal('target-country'));
       formData.append('target_side', getVal('target_side') || 'Front');
       formData.append('range_hexes', document.getElementById('range_hexes').value);
       formData.append('column_shifts', 0);
@@ -781,6 +901,9 @@
       formData.append('fear', getSelectedNumericValue('fear', 0));
       formData.append('shooter_modifiers', shooterModifiers);
       formData.append('target_modifiers', targetModifiers);
+      if (!document.getElementById('ammo-field').classList.contains('hidden')) {
+        formData.append('ammo', getVal('ammo') || 'HV');
+      }
       endpoint = '/api/vehicle-combat';
     } else {
       const infantryModifiers = Array.from(document.querySelectorAll('input[name="i-modifier"]:checked')).reduce((sum, el) => sum + Number(el.value), 0);
@@ -798,9 +921,22 @@
         body: formData
       });
       const result = await response.json();
+      if (!result.error && Number.isFinite(result.die_roll)) {
+        diceRolling = true;
+        document.getElementById('roll-btn').disabled = true;
+        try {
+          await animateDiceRoll(result.die_roll);
+        } finally {
+          diceRolling = false;
+          document.getElementById('roll-btn').disabled = false;
+        }
+      } else {
+        document.getElementById('dice-stage').classList.add('hidden');
+      }
       displayResult(result, s);
     } catch (error) {
       console.error('Error:', error);
+      document.getElementById('dice-stage').classList.add('hidden');
       displayResult({error: 'Calculation failed'}, s);
     }
   }
