@@ -353,6 +353,18 @@
     .cp-btn:disabled { opacity: 0.35; cursor: default; }
     .cp-btn:not(:disabled):active { transform: scale(0.96); }
 
+    .act-toggle { width: 100%; margin-bottom: 8px; }
+    .act-charts { margin-bottom: 12px; }
+    .act-charts .mod-tabs { margin-bottom: 10px; }
+    .act-table { width: 100%; border-collapse: collapse; font-size: 13px; color: #1a1a2e; }
+    .act-table th { font-size: 11px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: #7a7a8c; text-align: left; padding: 6px 4px; border-bottom: 1px solid #d8d8e0; }
+    .act-table td { padding: 7px 4px; border-bottom: 1px solid #e8e8f0; vertical-align: top; }
+    .act-table th:not(:first-child), .act-table td:not(:first-child) { text-align: center; width: 56px; }
+    .act-table td[colspan] { text-align: left; width: auto; }
+    .act-note { font-size: 11px; color: #7a7a8c; margin-top: 2px; }
+    .act-subtitle { font-size: 11px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: #7a7a8c; margin: 14px 0 4px; }
+    .act-mods { font-size: 13px; color: #1a1a2e; padding-left: 18px; }
+    .act-mods li { padding: 3px 0; }
     .cp-log { list-style: none; margin-top: 20px; border-top: 1px solid #e8e8f0; padding-top: 12px; }
     .cp-log li { font-size: 12px; color: #7a7a8c; padding: 3px 0; display: flex; justify-content: space-between; gap: 8px; }
     .cp-log li:first-child { color: #1a1a2e; }
@@ -620,6 +632,72 @@
         <button class="calc-btn" id="cp-draw-btn" onclick="cpDraw()">Draw chit</button>
 
         <div id="cp-sides"></div>
+
+        <button class="cp-btn act-toggle" id="act-toggle" onclick="toggleActivationCharts()" aria-expanded="false">Activation Charts ▾</button>
+        <div class="act-charts hidden" id="act-charts">
+          <div class="mod-tabs">
+            <button type="button" class="mod-tab active" id="act-tab-US" onclick="switchActivationTab('US')">🇺🇸 US activation</button>
+            <button type="button" class="mod-tab" id="act-tab-Soviet" onclick="switchActivationTab('Soviet')">🇷🇺 Soviet activation</button>
+          </div>
+          <div id="act-US">
+            <table class="act-table">
+              <thead><tr><th>Unit</th><th>Fire</th><th>Move</th></tr></thead>
+              <tbody>
+                <tr><td>Dismounted Squad<div class="act-note">+2 stacked or adjacent teams</div></td><td>1.5</td><td>1.5</td></tr>
+                <tr><td>Dismounted Platoon</td><td>4</td><td>4</td></tr>
+                <tr><td>Vehicle</td><td>1.5</td><td>1</td></tr>
+                <tr><td>Vehicle Platoon</td><td>4.5</td><td>3</td></tr>
+                <tr><td>Weapon Team</td><td>1</td><td>2</td></tr>
+                <tr><td>Observer Team / Leader</td><td>1</td><td>1</td></tr>
+                <tr><td>Helicopter</td><td>1</td><td>1</td></tr>
+                <tr><td>Helicopter Pair</td><td>2</td><td>2</td></tr>
+              </tbody>
+            </table>
+            <div class="act-subtitle">Other actions</div>
+            <table class="act-table">
+              <tbody>
+                <tr><td>Opportunity fire</td><td colspan="2">0 within 3 hexes, 1 beyond 3 hexes, + fear</td></tr>
+                <tr><td>Leader to rally</td><td colspan="2">1 per stack</td></tr>
+                <tr><td>Make smoke</td><td colspan="2">0.5 per unit</td></tr>
+              </tbody>
+            </table>
+            <div class="act-subtitle">Cost modifiers</div>
+            <ul class="act-mods">
+              <li>Minus leader rating for dismounted units</li>
+              <li>Plus ½ if any fear</li>
+              <li>Plus 1 if moving to an enemy-occupied hex</li>
+            </ul>
+          </div>
+          <div id="act-Soviet" class="hidden">
+            <table class="act-table">
+              <thead><tr><th>Unit</th><th>Fire</th><th>Move</th></tr></thead>
+              <tbody>
+                <tr><td>Dismounted Squad<div class="act-note">+1 MG and 1 non-MG team</div></td><td>2</td><td>2</td></tr>
+                <tr><td>Dismounted Platoon</td><td>3</td><td>3</td></tr>
+                <tr><td>Vehicle</td><td>2</td><td>1</td></tr>
+                <tr><td>Vehicle Platoon</td><td>3</td><td>2</td></tr>
+                <tr><td>Weapon Team</td><td>1</td><td>3</td></tr>
+                <tr><td>Observer Team / Leader</td><td>1</td><td>1</td></tr>
+                <tr><td>Helicopter</td><td>1</td><td>1</td></tr>
+                <tr><td>Helicopter Pair</td><td>2</td><td>2</td></tr>
+              </tbody>
+            </table>
+            <div class="act-subtitle">Other actions</div>
+            <table class="act-table">
+              <tbody>
+                <tr><td>Opportunity fire</td><td colspan="2">0 within 3 hexes, 1 beyond 3 hexes, + fear</td></tr>
+                <tr><td>Leader to rally</td><td colspan="2">1 per stack</td></tr>
+                <tr><td>Make smoke</td><td colspan="2">0.5 per unit</td></tr>
+              </tbody>
+            </table>
+            <div class="act-subtitle">Cost modifiers</div>
+            <ul class="act-mods">
+              <li>Minus leader rating for dismounted units</li>
+              <li>Plus ½ if any fear</li>
+              <li>Plus 1 if moving to an enemy-occupied hex</li>
+            </ul>
+          </div>
+        </div>
 
         <div class="cp-btn-row actions">
           <button class="cp-btn" id="cp-undo-btn" onclick="cpUndo()">↶ Undo</button>
@@ -1391,6 +1469,21 @@
     document.getElementById('cp-log').innerHTML = cp.log.map(e =>
       `<li><span>${e.text}</span><span>${e.cp}</span></li>`
     ).join('');
+  }
+
+  function toggleActivationCharts() {
+    const charts = document.getElementById('act-charts');
+    const open = charts.classList.toggle('hidden') === false;
+    const btn = document.getElementById('act-toggle');
+    btn.textContent = `Activation Charts ${open ? '▴' : '▾'}`;
+    btn.setAttribute('aria-expanded', open);
+  }
+
+  function switchActivationTab(side) {
+    for (const sd of CP_SIDES) {
+      document.getElementById(`act-${sd}`).classList.toggle('hidden', sd !== side);
+      document.getElementById(`act-tab-${sd}`).classList.toggle('active', sd === side);
+    }
   }
 
   cpLoad();
