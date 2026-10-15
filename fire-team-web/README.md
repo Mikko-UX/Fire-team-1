@@ -23,7 +23,16 @@ A web-based calculator for the FIRE TEAM 6.5 wargame system, replacing the Tkint
 
 3. Open your browser and go to `http://localhost:8000`
 
-## API Endpoints
+## Project Structure
+
+- `www/` – the whole app as static files (also the source for the iOS app):
+  - `index.html` – UI (vehicle, infantry and command point calculators)
+  - `engine.js` – weapon data and all combat calculations, run in the browser
+  - `sw.js`, `manifest.webmanifest`, `static/` – PWA service worker, manifest and icons
+- `main.py` – FastAPI server that serves `www/`; it still exposes the original Python API below,
+  but the app no longer uses it. Weapon or table changes belong in `www/engine.js`.
+
+## API Endpoints (legacy, not used by the app)
 
 - `GET /`: Main web interface
 - `GET /api/weapons`: Get list of all weapons
@@ -33,8 +42,7 @@ A web-based calculator for the FIRE TEAM 6.5 wargame system, replacing the Tkint
 ## Technology Stack
 
 - **Backend**: FastAPI (Python)
-- **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
-- **Templates**: Jinja2
+- **Frontend**: HTML5, CSS3, JavaScript (Vanilla); calculations in `www/engine.js`
 
 ## Original System
 

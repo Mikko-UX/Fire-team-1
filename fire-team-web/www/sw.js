@@ -1,8 +1,10 @@
 // Fire Team PWA service worker
 // Bump CACHE_VERSION whenever you change the app to force clients to update.
-const CACHE_VERSION = 'fireteam-v7';
+const CACHE_VERSION = 'fireteam-v8';
+// Everything the app needs runs locally, so caching these makes it fully offline.
 const APP_SHELL = [
   '/',
+  '/engine.js',
   '/static/icon-192.png',
   '/static/icon-512.png',
   '/static/apple-touch-icon.png',
@@ -29,14 +31,6 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
 
-  const url = new URL(request.url);
-
-  // API calls: always go to the network (calculations must be live).
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(fetch(request).catch(() => caches.match(request)));
-    return;
-  }
-
   // Navigations: network-first so updates land, cache fallback offline.
   if (request.mode === 'navigate') {
     event.respondWith(
@@ -47,6 +41,20 @@ self.addEventListener('fetch', (event) => {
           return resp;
         })
         .catch(() => caches.match('/'))
+    );
+    return;
+  }
+
+  // The engine changes together with the page, so fetch it network-first too.
+  if (new URL(request.url).pathname === '/engine.js') {
+    event.respondWith(
+      fetch(request)
+        .then((resp) => {
+          const copy = resp.clone();
+          caches.open(CACHE_VERSION).then((c) => c.put(request, copy));
+          return resp;
+        })
+        .catch(() => caches.match(request))
     );
     return;
   }

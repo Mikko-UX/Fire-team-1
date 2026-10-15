@@ -1,9 +1,8 @@
 from dataclasses import dataclass, field
 from typing import List, Optional, Literal, Dict, Any, NamedTuple
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi import FastAPI, Form
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 import uvicorn
 
 # ============================================================
@@ -543,19 +542,25 @@ BASE_DIR = Path(__file__).resolve().parent
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+# The app itself is the static folder www/ (also packaged as the iOS app);
+# all combat calculations run in www/engine.js in the browser.
+WWW_DIR = BASE_DIR / "www"
 
-templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+app.mount("/static", StaticFiles(directory=str(WWW_DIR / "static")), name="static")
 
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+@app.get("/", include_in_schema=False)
+async def home():
+    return FileResponse(WWW_DIR / "index.html", media_type="text/html")
+
+@app.get("/engine.js", include_in_schema=False)
+async def engine():
+    return FileResponse(WWW_DIR / "engine.js", media_type="application/javascript", headers={"Cache-Control": "no-cache"})
 
 # --- PWA: manifest & service worker served from root scope ---
 @app.get("/manifest.webmanifest", include_in_schema=False)
 async def manifest():
     return FileResponse(
-        BASE_DIR / "manifest.webmanifest",
+        WWW_DIR / "manifest.webmanifest",
         media_type="application/manifest+json",
     )
 
@@ -563,7 +568,7 @@ async def manifest():
 async def service_worker():
     # Served from "/" so the service worker can control the whole app.
     return FileResponse(
-        BASE_DIR / "sw.js",
+        WWW_DIR / "sw.js",
         media_type="application/javascript",
         headers={"Service-Worker-Allowed": "/", "Cache-Control": "no-cache"},
     )

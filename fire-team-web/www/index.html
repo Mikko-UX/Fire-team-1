@@ -6,9 +6,9 @@
   <title>Combat Calculator</title>
 
   <!-- PWA -->
-  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#1a1a2e" />
-  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+  <link rel="apple-touch-icon" href="static/apple-touch-icon.png" />
   <!-- iOS standalone (Add to Home Screen) -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -645,19 +645,14 @@
 
 </div>
 
+<script src="engine.js"></script>
 <script>
   let activeSection = 'vehicle';
   let weapons = [];
 
-  async function loadWeapons() {
-    try {
-      const response = await fetch('/api/weapons');
-      const data = await response.json();
-      weapons = data.weapons;
-      filterWeapons('vehicle');
-    } catch (error) {
-      console.error('Error loading weapons:', error);
-    }
+  function loadWeapons() {
+    weapons = FireTeamEngine.weapons;
+    filterWeapons('vehicle');
   }
 
   function filterWeapons(section) {
@@ -950,9 +945,6 @@
     // Unlock audio inside the click so the rattle also plays on iOS.
     getAudioContext();
     const s = activeSection;
-    let formData;
-    let endpoint;
-
     const missing = s === 'vehicle'
       ? !document.getElementById('shooter_weapon').value || !document.getElementById('target_weapon').value || document.getElementById('range_hexes').value === ''
       : document.getElementById('firepower').value === '';
@@ -964,42 +956,35 @@
       return;
     }
 
-    if (s === 'vehicle') {
-      // Only the modifiers on the active tab (HV or Missile) count.
-      const shooterModifiers = Array.from(document.querySelectorAll(`input[name="${activeModTab}_shooter_modifier"]:checked`)).reduce((sum, el) => sum + Number(el.value), 0);
-      const targetModifiers = Array.from(document.querySelectorAll(`input[name="${activeModTab}_target_modifier"]:checked`)).reduce((sum, el) => sum + Number(el.value), 0);
-      formData = new FormData();
-      formData.append('shooter_weapon', document.getElementById('shooter_weapon').value);
-      formData.append('target_weapon', document.getElementById('target_weapon').value);
-      formData.append('shooter_country', getVal('shooter-country'));
-      formData.append('target_country', getVal('target-country'));
-      formData.append('target_side', getVal('target_side') || 'Front');
-      formData.append('range_hexes', document.getElementById('range_hexes').value);
-      formData.append('column_shifts', 0);
-      formData.append('leadership', getSelectedNumericValue('leadership', 0));
-      formData.append('fear', getSelectedNumericValue('fear', 0));
-      formData.append('shooter_modifiers', shooterModifiers);
-      formData.append('target_modifiers', targetModifiers);
-      if (!document.getElementById('ammo-field').classList.contains('hidden')) {
-        formData.append('ammo', getVal('ammo') || 'HV');
-      }
-      endpoint = '/api/vehicle-combat';
-    } else {
-      const infantryModifiers = Array.from(document.querySelectorAll('input[name="i-modifier"]:checked')).reduce((sum, el) => sum + Number(el.value), 0);
-      formData = new FormData();
-      formData.append('firepower', document.getElementById('firepower').value);
-      formData.append('modifiers', infantryModifiers);
-      formData.append('leadership', getSelectedNumericValue('i-leadership', 0));
-      formData.append('fear', getSelectedNumericValue('i-fear', 0));
-      endpoint = '/api/infantry-combat';
-    }
-
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        body: formData
-      });
-      const result = await response.json();
+      let result;
+      if (s === 'vehicle') {
+        // Only the modifiers on the active tab (HV or Missile) count.
+        const shooterModifiers = Array.from(document.querySelectorAll(`input[name="${activeModTab}_shooter_modifier"]:checked`)).reduce((sum, el) => sum + Number(el.value), 0);
+        const targetModifiers = Array.from(document.querySelectorAll(`input[name="${activeModTab}_target_modifier"]:checked`)).reduce((sum, el) => sum + Number(el.value), 0);
+        result = FireTeamEngine.vehicleCombat({
+          shooterWeapon: document.getElementById('shooter_weapon').value,
+          shooterCountry: getVal('shooter-country'),
+          targetWeapon: document.getElementById('target_weapon').value,
+          targetCountry: getVal('target-country'),
+          targetSide: getVal('target_side') || 'Front',
+          rangeHexes: document.getElementById('range_hexes').value,
+          columnShifts: 0,
+          leadership: getSelectedNumericValue('leadership', 0),
+          fear: getSelectedNumericValue('fear', 0),
+          shooterModifiers,
+          targetModifiers,
+          ammo: document.getElementById('ammo-field').classList.contains('hidden') ? '' : (getVal('ammo') || 'HV')
+        });
+      } else {
+        const infantryModifiers = Array.from(document.querySelectorAll('input[name="i-modifier"]:checked')).reduce((sum, el) => sum + Number(el.value), 0);
+        result = FireTeamEngine.infantryCombat({
+          firepower: document.getElementById('firepower').value,
+          modifiers: infantryModifiers,
+          leadership: getSelectedNumericValue('i-leadership', 0),
+          fear: getSelectedNumericValue('i-fear', 0)
+        });
+      }
       if (!result.error && Number.isFinite(result.die_roll)) {
         diceRolling = true;
         document.getElementById('roll-btn').disabled = true;
@@ -1418,7 +1403,7 @@
   // Register the PWA service worker (enables install + offline shell).
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('/sw.js').catch(function (err) {
+      navigator.serviceWorker.register('sw.js').catch(function (err) {
         console.warn('SW registration failed:', err);
       });
     });
