@@ -356,6 +356,24 @@
     .cp-log { list-style: none; margin-top: 20px; border-top: 1px solid #e8e8f0; padding-top: 12px; }
     .cp-log li { font-size: 12px; color: #7a7a8c; padding: 3px 0; display: flex; justify-content: space-between; gap: 8px; }
     .cp-log li:first-child { color: #1a1a2e; }
+    .mod-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border: 2px solid #1a1a2e;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .mod-tab {
+      padding: 10px 8px;
+      font-size: 13px;
+      border: none;
+      background: #f0f0f4;
+      color: #7a7a8c;
+      cursor: pointer;
+    }
+    .mod-tab:first-child { border-right: 2px solid #1a1a2e; }
+    .mod-tab.active { background: #1a1a2e; color: #fff; font-weight: 500; }
+
     .hidden { display: none; }
   </style>
 </head>
@@ -439,26 +457,63 @@
         </div>
 
         <div class="field">
-          <div class="field-label">Shooter Modifiers</div>
-          <div class="checkbox-group">
-            <label class="checkbox-item"><input type="checkbox" name="shooter_modifier" value="4"><span>Cautious move (+4)</span></label>
-            <label class="checkbox-item"><input type="checkbox" name="shooter_modifier" value="2"><span>Change facing (+2)</span></label>
-            <label class="checkbox-item"><input type="checkbox" name="shooter_modifier" value="1"><span>Opportunity fire (+1)</span></label>
-            <label class="checkbox-item"><input type="checkbox" name="shooter_modifier" value="3"><span>Moving fire (+3)</span></label>
-            <label class="checkbox-item"><input type="checkbox" name="shooter_modifier" value="4"><span>Out of smoke (+4)</span></label>
-            <label class="checkbox-item"><input type="checkbox" name="shooter_modifier" value="2"><span>Night (+2)</span></label>
-            <label class="checkbox-item"><input type="checkbox" name="shooter_modifier" value="-1"><span>In firing ramp (-1)</span></label>
+          <div class="field-label">Modifiers</div>
+          <div class="mod-tabs">
+            <button type="button" class="mod-tab active" id="mod-tab-hv" onclick="switchModTab('hv')">HV (Gun, RKT)</button>
+            <button type="button" class="mod-tab" id="mod-tab-msl" onclick="switchModTab('msl')">Missile</button>
           </div>
         </div>
 
-        <div class="field">
-          <div class="field-label">Target Modifiers</div>
-          <div class="checkbox-group">
-            <label class="checkbox-item"><input type="checkbox" name="target_modifier" value="2"><span>In buildings (+2)</span></label>
-            <label class="checkbox-item"><input type="checkbox" name="target_modifier" value="3"><span>In smoke (+3)</span></label>
-            <label class="checkbox-item"><input type="checkbox" name="target_modifier" value="2"><span>In woods (+2)</span></label>
-            <label class="checkbox-item"><input type="checkbox" name="target_modifier" value="1"><span>Defilade/fire ramp (+1)</span></label>
-            <label class="checkbox-item"><input type="checkbox" name="target_modifier" value="1"><span>Cautious move (+1)</span></label>
+        <div id="mods-hv">
+          <div class="field">
+            <div class="field-label">Shooter Modifiers – HV (Gun, RKT)</div>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox" name="hv_shooter_modifier" value="3"><span>Cautious move (+3)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="hv_shooter_modifier" value="2"><span>Change facing (+2)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="hv_shooter_modifier" value="1"><span>Opportunity fire (+1)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="hv_shooter_modifier" value="3"><span>Moving fire (+3)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="hv_shooter_modifier" value="3"><span>Out of smoke (+3)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="hv_shooter_modifier" value="1"><span>Out of smoke IR (+1)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="hv_shooter_modifier" value="-1"><span>In firing ramp (-1)</span></label>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">Target Modifiers – HV (Gun, RKT)</div>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox" name="hv_target_modifier" value="1"><span>Cautious move (+1)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="hv_target_modifier" value="1"><span>In buildings (+1)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="hv_target_modifier" value="2"><span>In smoke (+2)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="hv_target_modifier" value="2"><span>In woods (+2)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="hv_target_modifier" value="2"><span>Defilade/fire ramp (+2)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="hv_target_modifier" value="-1"><span>Lower elevation (-1)</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div id="mods-msl" class="hidden">
+          <div class="field">
+            <div class="field-label">Shooter Modifiers – Missile</div>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox" name="msl_shooter_modifier" value="4"><span>Cautious move (+4)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="msl_shooter_modifier" value="2"><span>Change facing (+2)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="msl_shooter_modifier" value="1"><span>Opportunity fire (+1)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="msl_shooter_modifier" value="4"><span>Out of smoke (+4)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="msl_shooter_modifier" value="1"><span>Out of smoke IR (+1)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="msl_shooter_modifier" value="-1"><span>In firing ramp (-1)</span></label>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">Target Modifiers – Missile</div>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox" name="msl_target_modifier" value="1"><span>Cautious move (+1)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="msl_target_modifier" value="2"><span>In buildings (+2)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="msl_target_modifier" value="3"><span>In smoke (+3)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="msl_target_modifier" value="2"><span>In woods (+2)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="msl_target_modifier" value="1"><span>Defilade/fire ramp (+1)</span></label>
+              <label class="checkbox-item"><input type="checkbox" name="msl_target_modifier" value="-1"><span>Lower elevation (-1)</span></label>
+            </div>
           </div>
         </div>
 
@@ -618,6 +673,16 @@
     }
   }
 
+  // Gun/rocket and missile fire use different modifier tables.
+  let activeModTab = 'hv';
+  function switchModTab(tab) {
+    activeModTab = tab;
+    for (const t of ['hv', 'msl']) {
+      document.getElementById(`mods-${t}`).classList.toggle('hidden', t !== tab);
+      document.getElementById(`mod-tab-${t}`).classList.toggle('active', t === tab);
+    }
+  }
+
   // Show the HV/HT choice only for guns that have firepower for both; HV is the default.
   function updateAmmoChoice() {
     const shooterCountry = document.querySelector('input[name="shooter-country"]:checked').value;
@@ -625,6 +690,8 @@
     const w = weapons.find(x => x.country === shooterCountry && x.name === name);
     const both = w && w.type === 'GUN' && w.firepower_hv != null && w.firepower_ht != null;
     document.getElementById('ammo-field').classList.toggle('hidden', !both);
+    // Picking a weapon opens the matching modifier tab; it can still be switched by hand.
+    if (w) switchModTab(w.type === 'MSL' || w.type === 'SAM' ? 'msl' : 'hv');
     document.querySelector('input[name="ammo"][value="HV"]').checked = true;
     if (both) {
       document.getElementById('ammo-hv-label').textContent = `HV (${w.firepower_hv})`;
@@ -886,9 +953,21 @@
     let formData;
     let endpoint;
 
+    const missing = s === 'vehicle'
+      ? !document.getElementById('shooter_weapon').value || !document.getElementById('target_weapon').value || document.getElementById('range_hexes').value === ''
+      : document.getElementById('firepower').value === '';
+    if (missing) {
+      document.getElementById('dice-stage').classList.add('hidden');
+      document.getElementById('result-content').classList.remove('hidden');
+      document.getElementById('result-content').innerHTML = `<div style="color: #dc3545;">${s === 'vehicle' ? 'Select shooter weapon, target weapon and range first.' : 'Enter firepower first.'}</div>`;
+      document.getElementById('result-box').classList.add('visible');
+      return;
+    }
+
     if (s === 'vehicle') {
-      const shooterModifiers = Array.from(document.querySelectorAll('input[name="shooter_modifier"]:checked')).reduce((sum, el) => sum + Number(el.value), 0);
-      const targetModifiers = Array.from(document.querySelectorAll('input[name="target_modifier"]:checked')).reduce((sum, el) => sum + Number(el.value), 0);
+      // Only the modifiers on the active tab (HV or Missile) count.
+      const shooterModifiers = Array.from(document.querySelectorAll(`input[name="${activeModTab}_shooter_modifier"]:checked`)).reduce((sum, el) => sum + Number(el.value), 0);
+      const targetModifiers = Array.from(document.querySelectorAll(`input[name="${activeModTab}_target_modifier"]:checked`)).reduce((sum, el) => sum + Number(el.value), 0);
       formData = new FormData();
       formData.append('shooter_weapon', document.getElementById('shooter_weapon').value);
       formData.append('target_weapon', document.getElementById('target_weapon').value);
