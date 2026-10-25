@@ -261,15 +261,24 @@
     return i === -1 ? 18 : i;
   }
 
+  // Firepower multipliers are [numerator, denominator] pairs (e.g. [1, 2] for ½).
+  // They combine by multiplication and the result is rounded down.
+  const FRACTION_SYMBOLS = { '1/2': '½', '1/3': '⅓', '2/3': '⅔' };
+  const fractionText = ([n, d]) => (d === 1 ? String(n) : FRACTION_SYMBOLS[`${n}/${d}`] || `${n}/${d}`);
+
   function infantryCombat(p, dieRoll = rollD10()) {
     const firepower = Number(p.firepower);
+    const multipliers = p.fpMultipliers || [];
+    const num = multipliers.reduce((a, [n]) => a * n, 1);
+    const den = multipliers.reduce((a, [, d]) => a * d, 1);
+    const effectiveFirepower = Math.floor(firepower * num / den);
     const leadership = Number(p.leadership) || 0;
     const fear = Number(p.fear) || 0;
     let modifiers = Number(p.modifiers) || 0;
     if (leadership > 0) modifiers -= leadership;
     if (fear > 0) modifiers += fear;
 
-    const colIndex = columnIndexFromFirepower(firepower);
+    const colIndex = columnIndexFromFirepower(effectiveFirepower);
     const columnLetter = COLUMN_LETTERS[colIndex];
     const modifiedRoll = Math.min(14, Math.max(1, dieRoll + modifiers));
     const result = INFANTRY_FIRE_TABLE[modifiedRoll][colIndex];
@@ -277,6 +286,8 @@
       result,
       chosen_row_key: modifiedRoll,
       firepower_input: firepower,
+      effective_firepower: effectiveFirepower,
+      multiplier_text: multipliers.map(m => `× ${fractionText(m)}`).join(' '),
       die_roll: dieRoll,
       modifiers,
       modified_roll: modifiedRoll,

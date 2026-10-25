@@ -410,9 +410,9 @@
         <div class="field">
           <div class="field-label">Shooter Country</div>
           <div class="radio-group">
-            <label class="radio-item"><input type="radio" name="shooter-country" value="US" checked onchange="filterWeapons('vehicle')"><span>🇺🇸 US</span></label>
-            <label class="radio-item"><input type="radio" name="shooter-country" value="Soviet" onchange="filterWeapons('vehicle')"><span>🇷🇺 Soviet</span></label>
-            <label class="radio-item"><input type="radio" name="shooter-country" value="FIN" onchange="filterWeapons('vehicle')"><span>🇫🇮 FIN</span></label>
+            <label class="radio-item"><input type="radio" name="shooter-country" value="US" checked onchange="filterWeapons('shooter')"><span>🇺🇸 US</span></label>
+            <label class="radio-item"><input type="radio" name="shooter-country" value="Soviet" onchange="filterWeapons('shooter')"><span>🇷🇺 Soviet</span></label>
+            <label class="radio-item"><input type="radio" name="shooter-country" value="FIN" onchange="filterWeapons('shooter')"><span>🇫🇮 FIN</span></label>
           </div>
         </div>
 
@@ -438,9 +438,9 @@
         <div class="field">
           <div class="field-label">Target Country</div>
           <div class="radio-group">
-            <label class="radio-item"><input type="radio" name="target-country" value="US" checked onchange="filterWeapons('vehicle')"><span>🇺🇸 US</span></label>
-            <label class="radio-item"><input type="radio" name="target-country" value="Soviet" onchange="filterWeapons('vehicle')"><span>🇷🇺 Soviet</span></label>
-            <label class="radio-item"><input type="radio" name="target-country" value="FIN" onchange="filterWeapons('vehicle')"><span>🇫🇮 FIN</span></label>
+            <label class="radio-item"><input type="radio" name="target-country" value="US" checked onchange="filterWeapons('target')"><span>🇺🇸 US</span></label>
+            <label class="radio-item"><input type="radio" name="target-country" value="Soviet" onchange="filterWeapons('target')"><span>🇷🇺 Soviet</span></label>
+            <label class="radio-item"><input type="radio" name="target-country" value="FIN" onchange="filterWeapons('target')"><span>🇫🇮 FIN</span></label>
           </div>
         </div>
 
@@ -582,6 +582,18 @@
         </div>
 
         <div class="field">
+          <div class="field-label">Firer Modifiers</div>
+          <div class="checkbox-group single-column">
+            <label class="checkbox-item"><input type="checkbox" name="i-firer" value="2"><span>Firer changes facing (+2)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-firer" data-num="2" data-den="3"><span>Firer conducting moving fire (×⅔ FP)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-firer" data-num="1" data-den="2"><span>Firer is cautious moving (×½ FP)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-firer" data-num="1" data-den="2"><span>Indirect fire is not spotted (×½ FP)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-firer" data-num="1" data-den="2"><span>Firer in/out of smoke (×½ FP)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-firer" data-num="1" data-den="3"><span>Firer is mounted (×⅓ FP)</span></label>
+          </div>
+        </div>
+
+        <div class="field">
           <div class="field-label">Target Modifiers</div>
           <div class="checkbox-group single-column">
             <label class="checkbox-item"><input type="checkbox" name="i-modifier" value="2"><span>Target in defilade (+2)</span></label>
@@ -594,6 +606,9 @@
             <label class="checkbox-item"><input type="checkbox" name="i-modifier" value="-2"><span>Target is a vehicle (-2)</span></label>
             <label class="checkbox-item"><input type="checkbox" name="i-modifier" value="2"><span>Target entrenched vs. direct fire (+2)</span></label>
             <label class="checkbox-item"><input type="checkbox" name="i-modifier" value="3"><span>Target entrenched vs. indirect fire (+3)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-modifier" data-num="1" data-den="2"><span>Target at double printed range (×½ FP)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-modifier" data-num="2" data-den="1"><span>Target is adjacent to firer (×2 FP)</span></label>
+            <label class="checkbox-item"><input type="checkbox" name="i-modifier" data-num="3" data-den="1"><span>Target is in same hex as firer (×3 FP)</span></label>
           </div>
         </div>
       </div>
@@ -633,8 +648,8 @@
 
         <div id="cp-sides"></div>
 
-        <button class="cp-btn act-toggle" id="act-toggle" onclick="toggleActivationCharts()" aria-expanded="false">Activation Charts ▾</button>
-        <div class="act-charts hidden" id="act-charts">
+        <button class="cp-btn act-toggle" id="act-toggle" onclick="toggleActivationCharts()" aria-expanded="true">Activation Charts ▴</button>
+        <div class="act-charts" id="act-charts">
           <div class="mod-tabs">
             <button type="button" class="mod-tab active" id="act-tab-US" onclick="switchActivationTab('US')">🇺🇸 US activation</button>
             <button type="button" class="mod-tab" id="act-tab-Soviet" onclick="switchActivationTab('Soviet')">🇷🇺 Soviet activation</button>
@@ -730,19 +745,21 @@
 
   function loadWeapons() {
     weapons = FireTeamEngine.weapons;
-    filterWeapons('vehicle');
+    filterWeapons('shooter');
+    filterWeapons('target');
   }
 
-  function filterWeapons(section) {
-    if (section === 'vehicle') {
-      const shooterCountry = document.querySelector('input[name="shooter-country"]:checked').value;
-      const targetCountry = document.querySelector('input[name="target-country"]:checked').value;
-      const excludedTargetTypes = ['MSL', 'RKT', 'SAM'];
-      const shooterWeapons = weapons.filter(w => w.country === shooterCountry);
-      const targetWeapons = weapons.filter(w => w.country === targetCountry && !excludedTargetTypes.includes(w.type));
-      populateSelect('shooter_weapon', shooterWeapons);
-      populateSelect('target_weapon', targetWeapons);
+  // Changing one side's country only refills that side's weapon list,
+  // so picking the target country no longer clears the shooter weapon.
+  function filterWeapons(which) {
+    if (which === 'shooter') {
+      const shooterCountry = getVal('shooter-country');
+      populateSelect('shooter_weapon', weapons.filter(w => w.country === shooterCountry));
       updateAmmoChoice();
+    } else {
+      const targetCountry = getVal('target-country');
+      const excludedTargetTypes = ['MSL', 'RKT', 'SAM'];
+      populateSelect('target_weapon', weapons.filter(w => w.country === targetCountry && !excludedTargetTypes.includes(w.type)));
     }
   }
 
@@ -779,6 +796,7 @@
 
   function populateSelect(selectId, weaponList) {
     const select = document.getElementById(selectId);
+    const previous = select.value;
     select.innerHTML = '<option value="">— select weapon —</option>';
     weaponList.forEach(weapon => {
       const option = document.createElement('option');
@@ -786,6 +804,8 @@
       option.textContent = weapon.name;
       select.appendChild(option);
     });
+    // Keep the chosen weapon if the new country has one with the same name.
+    if (weaponList.some(w => w.name === previous)) select.value = previous;
   }
 
   function switchSection(section) {
@@ -1055,9 +1075,13 @@
           ammo: document.getElementById('ammo-field').classList.contains('hidden') ? '' : (getVal('ammo') || 'HV')
         });
       } else {
-        const infantryModifiers = Array.from(document.querySelectorAll('input[name="i-modifier"]:checked')).reduce((sum, el) => sum + Number(el.value), 0);
+        // Checked boxes either add to the die roll (value) or multiply firepower (data-num/data-den).
+        const checked = Array.from(document.querySelectorAll('input[name="i-modifier"]:checked, input[name="i-firer"]:checked'));
+        const infantryModifiers = checked.filter(el => !el.dataset.num).reduce((sum, el) => sum + Number(el.value), 0);
+        const fpMultipliers = checked.filter(el => el.dataset.num).map(el => [Number(el.dataset.num), Number(el.dataset.den)]);
         result = FireTeamEngine.infantryCombat({
           firepower: document.getElementById('firepower').value,
+          fpMultipliers,
           modifiers: infantryModifiers,
           leadership: getSelectedNumericValue('i-leadership', 0),
           fear: getSelectedNumericValue('i-fear', 0)
@@ -1119,7 +1143,7 @@
         <div style="margin-bottom: 10px;"><strong>Table Coordinate:</strong> ${result.table_coord}</div>
         <div style="margin-bottom: 10px;"><strong>Leadership:</strong> ${result.leadership}</div>
         <div style="margin-bottom: 10px;"><strong>Fear:</strong> ${result.fear}</div>
-        <div style="margin-bottom: 10px;"><strong>Firepower:</strong> ${result.firepower_input} (${result.col_range_description})</div>
+        <div style="margin-bottom: 10px;"><strong>Firepower:</strong> ${result.multiplier_text ? `${result.firepower_input} ${result.multiplier_text} = <strong>${result.effective_firepower}</strong>` : result.firepower_input} (${result.col_range_description})</div>
         <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; font-size: 12px; white-space: pre-wrap;">${result.explanation}</pre>
       `;
     }

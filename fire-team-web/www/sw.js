@@ -1,6 +1,6 @@
 // Fire Team PWA service worker
 // Bump CACHE_VERSION whenever you change the app to force clients to update.
-const CACHE_VERSION = 'fireteam-v9';
+const CACHE_VERSION = 'fireteam-v11';
 // Everything the app needs runs locally, so caching these makes it fully offline.
 const APP_SHELL = [
   '/',
