@@ -13,6 +13,25 @@
     { name: "Law RKT", side: "US", type: "RKT", fpHV: null, fpHT: 6, ammo: "HT",
       ranges: [[1, 0, 0], [2, 1, 1], [4, 2, 2], [6, 3, 3], [7, 4, 5]],
       armor: { hvFront: 0, hvFlank: 0, htFront: 0, htFlank: 0 } },
+    // NLAW (Saab): 150 mm top-attack shaped charge, 20–1000 m. HT 14 sits between Spandrel (13) and TOW (15)
+    // because the top attack largely bypasses frontal armor; best columns at short range.
+    { name: "NLAW MSL", side: "US", type: "MSL", fpHV: null, fpHT: 14, ammo: "HT",
+      ranges: [[1, 0, 3], [2, 4, 5], [3, 6, 7], [4, 8, 10]],
+      armor: { hvFront: 0, hvFlank: 0, htFront: 0, htFlank: 0 } },
+    // Javelin (FGM-148): 127 mm tandem shaped charge, top attack, fire-and-forget, about 65–2500 m.
+    // HT 17 like Spiral, just under Hellfire (18). Like TOW/Hellfire it is best at longer range;
+    // very close shots lose the top-attack profile.
+    { name: "Javelin MSL", side: "US", type: "MSL", fpHV: null, fpHT: 17, ammo: "HT",
+      ranges: [[1, 3, 25], [2, 2, 2], [3, 1, 1]],
+      armor: { hvFront: 0, hvFlank: 0, htFront: 0, htFlank: 0 } },
+    // Spike-LR / Spike-MR (Rafael): tandem shaped charge, top or direct attack, fire-and-forget with
+    // operator updates. HT 16 between TOW (15) and Javelin (17); LR about 200–4000 m, MR 200–2500 m.
+    { name: "Spike LR MSL", side: "US", type: "MSL", fpHV: null, fpHT: 16, ammo: "HT",
+      ranges: [[1, 4, 40], [2, 3, 3], [3, 2, 2]],
+      armor: { hvFront: 0, hvFlank: 0, htFront: 0, htFlank: 0 } },
+    { name: "Spike MR MSL", side: "US", type: "MSL", fpHV: null, fpHT: 16, ammo: "HT",
+      ranges: [[1, 4, 25], [2, 3, 3], [3, 2, 2]],
+      armor: { hvFront: 0, hvFlank: 0, htFront: 0, htFlank: 0 } },
     { name: "Dragon MSL", side: "US", type: "MSL", fpHV: null, fpHT: 10, ammo: "HT",
       ranges: [[3, 3, 10]],
       armor: { hvFront: 0, hvFlank: 0, htFront: 0, htFlank: 0 } },
@@ -111,8 +130,9 @@
     { name: "Leopard 2", side: "FIN", type: "GUN", fpHV: 18, fpHT: 10, ammo: "HV",
       ranges: [[1, 0, 7], [2, 8, 11], [3, 12, 14], [4, 15, 18], [5, 19, 21], [6, 22, 26], [7, 27, 32]],
       armor: { hvFront: 12, hvFlank: 6, htFront: 10, htFlank: 5 } },
-    { name: "CV90C", side: "FIN", type: "GUN", fpHV: 9, fpHT: 3, ammo: "HV",
-      ranges: [[1, 0, 5], [2, 6, 7], [3, 8, 9], [4, 10, 11], [5, 12, 14], [6, 15, 18], [7, 19, 22]],
+    // CV9030FIN: 30 mm APFSDS (no HEAT round, no missile); modern fire control gives M1-like column 1 reach.
+    { name: "CV90C", side: "FIN", type: "GUN", fpHV: 9, fpHT: null, ammo: "HV",
+      ranges: [[1, 0, 7], [2, 8, 10], [3, 11, 13], [4, 14, 16], [5, 17, 19], [6, 20, 22], [7, 23, 25]],
       armor: { hvFront: 6, hvFlank: 4, htFront: 4, htFlank: 2 } },
     { name: "BMP-1", side: "FIN", type: "GUN", fpHV: null, fpHT: 9, ammo: "HT",
       ranges: [[1, 0, 4], [2, 5, 5], [3, 6, 6], [4, 7, 7], [5, 8, 8], [6, 9, 10], [7, 11, 12], [8, 13, 14]],
@@ -137,6 +157,25 @@
       armor: { hvFront: 0, hvFlank: 0, htFront: 0, htFlank: 0 } },
     { name: "Apilas", side: "FIN", type: "GUN", fpHV: null, fpHT: 9, ammo: "HT",
       ranges: [[2, 1, 1], [4, 2, 2], [6, 3, 3], [7, 4, 5]],
+      armor: { hvFront: 0, hvFlank: 0, htFront: 0, htFlank: 0 } },
+    // NLAW (Saab): 150 mm top-attack shaped charge, 20–1000 m. HT 14 sits between Spandrel (13) and TOW (15)
+    // because the top attack largely bypasses frontal armor; best columns at short range.
+    { name: "NLAW MSL", side: "FIN", type: "MSL", fpHV: null, fpHT: 14, ammo: "HT",
+      ranges: [[1, 0, 3], [2, 4, 5], [3, 6, 7], [4, 8, 10]],
+      armor: { hvFront: 0, hvFlank: 0, htFront: 0, htFlank: 0 } },
+    // Javelin (FGM-148): 127 mm tandem shaped charge, top attack, fire-and-forget, about 65–2500 m.
+    // HT 17 like Spiral, just under Hellfire (18). Like TOW/Hellfire it is best at longer range;
+    // very close shots lose the top-attack profile.
+    { name: "Javelin MSL", side: "FIN", type: "MSL", fpHV: null, fpHT: 17, ammo: "HT",
+      ranges: [[1, 3, 25], [2, 2, 2], [3, 1, 1]],
+      armor: { hvFront: 0, hvFlank: 0, htFront: 0, htFlank: 0 } },
+    // Spike-LR / Spike-MR (Rafael): tandem shaped charge, top or direct attack, fire-and-forget with
+    // operator updates. HT 16 between TOW (15) and Javelin (17); LR about 200–4000 m, MR 200–2500 m.
+    { name: "Spike LR MSL", side: "FIN", type: "MSL", fpHV: null, fpHT: 16, ammo: "HT",
+      ranges: [[1, 4, 40], [2, 3, 3], [3, 2, 2]],
+      armor: { hvFront: 0, hvFlank: 0, htFront: 0, htFlank: 0 } },
+    { name: "Spike MR MSL", side: "FIN", type: "MSL", fpHV: null, fpHT: 16, ammo: "HT",
+      ranges: [[1, 4, 25], [2, 3, 3], [3, 2, 2]],
       armor: { hvFront: 0, hvFlank: 0, htFront: 0, htFlank: 0 } },
     { name: "TOW", side: "FIN", type: "MSL", fpHV: null, fpHT: 15, ammo: "HT",
       ranges: [[1, 7, 40], [2, 6, 6], [3, 5, 5], [4, 4, 4], [6, 2, 3]],
