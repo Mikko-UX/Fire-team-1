@@ -753,7 +753,7 @@
   function filterWeapons(which) {
     if (which === 'shooter') {
       const shooterCountry = getVal('shooter-country');
-      populateSelect('shooter_weapon', weapons.filter(w => w.country === shooterCountry));
+      populateSelect('shooter_weapon', weapons.filter(w => w.country === shooterCountry && w.type !== 'VEH'));
       updateAmmoChoice();
     } else {
       const targetCountry = getVal('target-country');
