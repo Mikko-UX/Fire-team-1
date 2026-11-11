@@ -25,31 +25,31 @@ FONT_RESULT_TITLE = ('Arial', 18, 'bold')
 FONT_RESULT_DETAIL = ('Arial', 14)
 FONT_RADIOBUTTON = ('Arial', 11)
 
-COLOR_BG_MAIN = '#2c3e50'
-COLOR_HEADER_BG = '#34495e'
-COLOR_BTN_VEHICLE = '#3498db'
-COLOR_BTN_INFANTRY = '#2ecc71'
-COLOR_BTN_INACTIVE = '#95a5a6'
-COLOR_BTN_DISABLED = '#cccccc'
-COLOR_BTN_ENABLED = '#2ecc71'
-COLOR_RESULT_BG = '#1abc9c'
-COLOR_DICE_BTN = '#f39c12'
+COLOR_BG_MAIN = '#ffffff'
+COLOR_HEADER_BG = '#030213'
+COLOR_BTN_VEHICLE = '#5b4d8f'
+COLOR_BTN_INFANTRY = '#2d8659'
+COLOR_BTN_INACTIVE = '#ececf0'
+COLOR_BTN_DISABLED = '#f3f3f5'
+COLOR_BTN_ENABLED = '#2d8659'
+COLOR_RESULT_BG = '#FFD700'
+COLOR_DICE_BTN = '#e67e22'
 COLOR_SUCCESS = '#27ae60'
 COLOR_FAIL = '#c0392b'
-COLOR_INFO_BG = '#FFF9C4'
-COLOR_INFANTRY_BTN_BG = '#4CAF50'
+COLOR_INFO_BG = '#e9ebef'
+COLOR_INFANTRY_BTN_BG = '#2d8659'
 COLOR_INFANTRY_HINT = '#1B5E20'
-COLOR_TEXT_BLACK = '#000000'
-COLOR_TEXT_WHITE = 'white'
+COLOR_TEXT_BLACK = '#030213'
+COLOR_TEXT_WHITE = '#ffffff'
 
-# tab highlight color (yellow)
-COLOR_TAB_HIGHLIGHT = '#F9E79F'
+# tab highlight color (light green)
+COLOR_TAB_HIGHLIGHT = '#c8e6c9'
 
-VEHICLE_BG = '#D3D3D3'
-VEHICLE_SECTION_BG = '#E8E8E8'
+VEHICLE_BG = '#f3f3f5'
+VEHICLE_SECTION_BG = '#e9ebef'
 
-INFANTRY_BG = '#C8E6C9'
-INFANTRY_SECTION_BG = '#A5D6A7'
+INFANTRY_BG = '#e8f5e9'
+INFANTRY_SECTION_BG = '#c8e6c9'
 
 # --- Type Definitions ---
 
@@ -388,7 +388,7 @@ INFANTRY_FIRE_TABLE = {
     4:  ["E", "E", "E", "E", "E", "E", "F", "F", "F", "F", "F", "F", "F", "F", "2", "2", "1", "1", "1"],
     5:  ["E", "E", "E", "E", "E", "E", "F", "F", "F", "F", "F", "F", "F", "2", "2", "1", "0", "0", "0"],
     6:  ["E", "E", "E", "E", "E", "F", "F", "F", "F", "F", "F", "F", "2", "2", "1", "1", "0", "0", "0"],
-    7:  ["E", "E", "E", "E", "1", "1", "1", "F", "F", "F", "F", "2", "2", "1", "1", "1", "0", "0", "0"],
+    7:  ["E", "E", "E", "E", "1", "F", "1", "F", "F", "F", "F", "2", "2", "1", "1", "1", "0", "0", "0"],
     8:  ["E", "E", "E", "F", "F", "F", "F", "F", "F", "2", "2", "2", "1", "1", "1", "0", "0", "0", "0"],
     9:  ["E", "E", "E", "F", "F", "F", "F", "2", "2", "2", "2", "1", "1", "1", "0", "0", "0", "0", "0"],
     10: ["E", "E", "E", "F", "F", "F", "F", "2", "2", "2", "2", "1", "1", "1", "0", "0", "0", "0", "0"],
@@ -570,7 +570,7 @@ SHOOTER_MODIFIERS = [
     ("Cautious move", "shooter_cautious_move", {"gun": 3, "msl": 4}),
     ("Change facing", "shooter_change_facing", {"gun": 2, "msl": 2}),
     ("Opportunity fire", "shooter_opportunity_fire", {"gun": 1, "msl": 1}),
-    ("Moving fire", "shooter_moving_fire", {"gun": 3, "msl": None}),
+    ("Moving fire", "shooter_moving_fire", {"gun": 3, "msl": 3}),
     ("Out of smoke", "shooter_out_of_smoke", {"gun": 3, "msl": 4}),
     ("Night", "shooter_night", {"gun": 2, "msl": 2}),
     ("In firing ramp", "shooter_firing_ramp", {"gun": -1, "msl": -1}),
@@ -608,9 +608,13 @@ class TaisteluLaskuriUI:
             font=FONT_HEADER,
             bg=COLOR_BTN_VEHICLE,
             fg=COLOR_TEXT_BLACK,
+            activebackground=COLOR_BTN_VEHICLE,
+            activeforeground=COLOR_TEXT_BLACK,
             relief='flat',
             cursor='hand2',
-            command=self.ajoneuvotaistelu_valittu
+            command=self.ajoneuvotaistelu_valittu,
+            highlightthickness=0,
+            bd=0
         )
         self.btn_ajoneuvotaistelu.pack(side='left', expand=True, fill='both', padx=(5, 2), pady=5)
 
@@ -620,9 +624,13 @@ class TaisteluLaskuriUI:
             font=FONT_HEADER,
             bg=COLOR_BTN_INFANTRY,
             fg=COLOR_TEXT_BLACK,
+            activebackground=COLOR_BTN_INFANTRY,
+            activeforeground=COLOR_TEXT_BLACK,
             relief='flat',
             cursor='hand2',
-            command=self.jalkaväki_valittu
+            command=self.jalkaväki_valittu,
+            highlightthickness=0,
+            bd=0
         )
         self.btn_jv.pack(side='left', expand=True, fill='both', padx=(2, 5), pady=5)
 
@@ -640,12 +648,30 @@ class TaisteluLaskuriUI:
         self.main_canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        self.main_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+        # Mouse wheel scrolling - bind to root window for all platforms
+        self.root.bind_all("<MouseWheel>", self._on_mousewheel)  # Windows & macOS
+        self.root.bind_all("<Button-4>", self._on_mousewheel_linux)  # Linux scroll up
+        self.root.bind_all("<Button-5>", self._on_mousewheel_linux)  # Linux scroll down
+        # Also bind to canvas directly
+        self.main_canvas.bind("<MouseWheel>", self._on_mousewheel)
+        self.main_canvas.bind("<Button-4>", self._on_mousewheel_linux)
+        self.main_canvas.bind("<Button-5>", self._on_mousewheel_linux)
 
         self.ajoneuvotaistelu_valittu()
 
     def _on_mousewheel(self, event):
-        self.main_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        # Handle mouse wheel for Windows and macOS
+        if hasattr(event, 'delta'):
+            self.main_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        return "break"
+
+    def _on_mousewheel_linux(self, event):
+        # Linux uses Button-4 for up, Button-5 for down
+        if event.num == 4:
+            self.main_canvas.yview_scroll(-3, "units")
+        elif event.num == 5:
+            self.main_canvas.yview_scroll(3, "units")
+        return "break"
 
     def _validate_int(self, value):
         if value == "":
@@ -707,9 +733,9 @@ class TaisteluLaskuriUI:
 
     def ajoneuvotaistelu_valittu(self):
         self.tyhjenna_nakyma()
-        # highlight selected tab
-        self.btn_ajoneuvotaistelu.config(bg=COLOR_TAB_HIGHLIGHT)
-        self.btn_jv.config(bg=COLOR_BTN_INFANTRY)
+        # highlight selected tab - active tab uses button color, inactive uses grey
+        self.btn_ajoneuvotaistelu.config(bg=COLOR_BTN_VEHICLE, fg=COLOR_TEXT_BLACK)
+        self.btn_jv.config(bg=COLOR_BTN_INACTIVE, fg=COLOR_TEXT_BLACK)
 
         self.bg_color = VEHICLE_BG
         self.section_bg = VEHICLE_SECTION_BG
@@ -789,7 +815,7 @@ class TaisteluLaskuriUI:
         self.fear_var = tk.StringVar(value="0")
         fear_frame = tk.Frame(ampuja_frame, bg=self.section_bg)
         fear_frame.pack(pady=5)
-        for i in range(3):
+        for i in range(5):
             tk.Radiobutton(fear_frame, text=f"+{i}" if i > 0 else "0", variable=self.fear_var, value=str(i), font=FONT_BODY, bg=self.section_bg, fg=self.text_color, selectcolor=self.bg_color).pack(side='left', padx=10)
 
         tk.Label(ampuja_frame, text="Range (hexes)", font=FONT_SUBHEADER, bg=self.section_bg, fg=self.text_color).pack(pady=(10, 5))
@@ -1016,9 +1042,9 @@ Final Column: {base_col if base_col is not None else "N/A"} {total_shift:+d} = {
 
     def jalkaväki_valittu(self):
         self.tyhjenna_nakyma()
-        # highlight selected tab
-        self.btn_ajoneuvotaistelu.config(bg=COLOR_BTN_VEHICLE)
-        self.btn_jv.config(bg=COLOR_TAB_HIGHLIGHT)
+        # highlight selected tab - active tab uses button color, inactive uses grey
+        self.btn_ajoneuvotaistelu.config(bg=COLOR_BTN_INACTIVE, fg=COLOR_TEXT_BLACK)
+        self.btn_jv.config(bg=COLOR_BTN_INFANTRY, fg=COLOR_TEXT_BLACK)
 
         self.bg_color = INFANTRY_BG
         self.section_bg = INFANTRY_SECTION_BG
@@ -1076,7 +1102,7 @@ Final Column: {base_col if base_col is not None else "N/A"} {total_shift:+d} = {
         self.jv_fear_var = tk.StringVar(value="0")
         jv_fear = tk.Frame(noppa_frame, bg=self.section_bg)
         jv_fear.pack(pady=5)
-        for i in range(3):
+        for i in range(5):
             tk.Radiobutton(jv_fear, text=f"+{i}" if i > 0 else "0", variable=self.jv_fear_var, value=str(i), font=FONT_BODY, bg=self.section_bg, fg=self.text_color, selectcolor=self.bg_color).pack(side='left', padx=10)
 
         kohde_frame = self.luo_osio_frame("📍 TERRAIN MODIFIERS", right_column)

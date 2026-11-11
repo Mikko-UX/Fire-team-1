@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "fire-team-web",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["fire-team-web/main.py"],
+      "port": 8002
+    },
+    {
+      "name": "www-static",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8010", "--directory", "fire-team-web/www"],
+      "port": 8010
+    }
+  ]
+}

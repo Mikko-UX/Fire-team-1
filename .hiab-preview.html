@@ -1,0 +1,1826 @@
+<title>Hiab Configurator 2.0</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#E9ECEF; --surface:#FFFFFF; --surface-2:#F4F6F8; --surface-3:#E7EBEE;
+  --ink:#12171B; --ink-2:#5C6873; --ink-3:#8A959F;
+  --line:#D2D9DE; --line-2:#BFC8CF;
+  --accent:#C9241D; --accent-fill:#C9241D; --accent-soft:#FBECEA; --accent-line:#E8A9A4; --on-accent:#FFFFFF;
+  --ok:#1C6B5F; --ok-soft:#E4F0ED; --ok-line:#A9CFC7;
+  --warn:#9A5B00; --warn-soft:#FBF0DC; --warn-line:#E3C688;
+  --data:#255C8A; --data-soft:#E6EEF5; --data-line:#A8C4DA;
+  --hatch:#C3CCD3;
+  --shadow:0 1px 2px rgba(18,23,27,.06), 0 10px 28px -14px rgba(18,23,27,.22);
+  --shadow-pop:0 2px 4px rgba(18,23,27,.08), 0 18px 40px -16px rgba(18,23,27,.32);
+  --r:3px;
+  --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --disp:"Archivo","IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#12161A; --surface:#1A1F24; --surface-2:#20262C; --surface-3:#262D34;
+    --ink:#E7ECF0; --ink-2:#94A0AA; --ink-3:#6E7B86;
+    --line:#2E363E; --line-2:#3B454E;
+    --accent:#F0665C; --accent-fill:#C4372E; --accent-soft:#2E1C1A; --accent-line:#5E2E29; --on-accent:#FFFFFF;
+    --ok:#5CB9A5; --ok-soft:#162926; --ok-line:#2C4A44;
+    --warn:#DCA23A; --warn-soft:#2A2317; --warn-line:#4C3E1F;
+    --data:#7FB0DE; --data-soft:#182430; --data-line:#2C4358;
+    --hatch:#39424A;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
+    --shadow-pop:0 2px 4px rgba(0,0,0,.5), 0 18px 40px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#12161A; --surface:#1A1F24; --surface-2:#20262C; --surface-3:#262D34;
+  --ink:#E7ECF0; --ink-2:#94A0AA; --ink-3:#6E7B86;
+  --line:#2E363E; --line-2:#3B454E;
+  --accent:#F0665C; --accent-fill:#C4372E; --accent-soft:#2E1C1A; --accent-line:#5E2E29; --on-accent:#FFFFFF;
+  --ok:#5CB9A5; --ok-soft:#162926; --ok-line:#2C4A44;
+  --warn:#DCA23A; --warn-soft:#2A2317; --warn-line:#4C3E1F;
+  --data:#7FB0DE; --data-soft:#182430; --data-line:#2C4358;
+  --hatch:#39424A;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
+  --shadow-pop:0 2px 4px rgba(0,0,0,.5), 0 18px 40px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:13.5px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;padding-bottom:64px}
+h1,h2,h3,h4{margin:0;font-family:var(--disp);text-wrap:balance}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-ligatures:none}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ---------- eyebrow / label ---------- */
+.eyebrow{font-family:var(--disp);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:60;background:var(--surface);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:18px;padding:0 18px;height:52px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+.brand{display:flex;align-items:baseline;gap:9px;flex:0 0 auto}
+.brand .mark{font-family:var(--disp);font-weight:700;font-size:17px;letter-spacing:.02em;color:var(--accent)}
+.brand .prod{font-family:var(--disp);font-weight:600;font-size:14px;letter-spacing:.01em}
+.brand .ver{font-family:var(--mono);font-size:11px;color:var(--ink-3);padding-bottom:1px}
+.topbar .sep{width:1px;height:24px;background:var(--line);flex:0 0 auto}
+.topmeta{display:flex;align-items:center;gap:16px;flex:1 1 auto;min-width:0;overflow:hidden}
+.kv{display:flex;flex-direction:column;gap:1px;min-width:0}
+.kv .k{font-family:var(--disp);font-size:9.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.kv .v{font-family:var(--mono);font-size:11.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topact{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.demotag{font-family:var(--disp);font-size:9.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn-line);padding:3px 7px;border-radius:2px}
+
+/* ---------- controls ---------- */
+.btn{font-family:var(--disp);font-size:12px;font-weight:600;padding:6px 11px;border:1px solid var(--line-2);
+  border-radius:var(--r);background:var(--surface);color:var(--ink);transition:background .12s,border-color .12s}
+.btn:hover{background:var(--surface-2);border-color:var(--ink-3)}
+.btn.primary{background:var(--accent-fill);border-color:var(--accent-fill);color:var(--on-accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.btn.sm{font-size:11px;padding:4px 8px}
+select.ctl{font-family:var(--mono);font-size:11.5px;padding:5px 8px;border:1px solid var(--line-2);
+  border-radius:var(--r);background:var(--surface);color:var(--ink)}
+
+/* ---------- telemetry strip ---------- */
+.telemetry{position:sticky;top:52px;z-index:55;background:var(--surface-2);border-bottom:1px solid var(--line);
+  display:flex;align-items:stretch;gap:0;overflow-x:auto;scrollbar-width:thin}
+.tcell{padding:8px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:2px;flex:0 0 auto;min-width:96px}
+.tcell .t-k{font-family:var(--disp);font-size:9.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.tcell .t-v{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums;line-height:1.15}
+.tcell .t-v small{font-size:10px;color:var(--ink-3);font-weight:400}
+.tcell.state{margin-left:auto;border-right:0;justify-content:center;min-width:0}
+.statechip{display:inline-flex;align-items:center;gap:7px;font-family:var(--disp);font-size:11.5px;font-weight:600;
+  padding:5px 10px;border-radius:2px;white-space:nowrap}
+.statechip .dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.statechip.ok{color:var(--ok);background:var(--ok-soft);border:1px solid var(--ok-line)}
+.statechip.ok .dot{background:var(--ok)}
+.statechip.cyc{color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn-line)}
+.statechip.cyc .dot{background:var(--warn);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.statechip.cyc .dot{animation:none}}
+.flash{animation:flashbg .5s ease-out}
+@keyframes flashbg{0%{background:var(--data-soft)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){.flash{animation:none}}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:230px minmax(0,1fr) 404px;gap:18px;
+  max-width:1680px;margin:0 auto;padding:18px}
+@media (max-width:1300px){.shell{grid-template-columns:210px minmax(0,1fr);}
+  .inspector{grid-column:1 / -1}}
+@media (max-width:900px){.shell{grid-template-columns:minmax(0,1fr);padding:12px;gap:12px}}
+
+/* ---------- panels ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.panel-h{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 12px;border-bottom:1px solid var(--line)}
+.panel-h h3{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+
+/* ---------- left rail ---------- */
+.rail{position:sticky;top:104px;align-self:start;display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 122px);overflow-y:auto;scrollbar-width:thin}
+@media (max-width:900px){.rail{position:static;max-height:none}}
+.steps{display:flex;flex-direction:column}
+.step{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;text-align:left;
+  padding:10px 12px;border-bottom:1px solid var(--line);width:100%;position:relative;transition:background .12s}
+.step:last-child{border-bottom:0}
+.step:hover{background:var(--surface-2)}
+.step.on{background:var(--accent-soft)}
+.step.on::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent)}
+.step .num{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);padding-top:2px}
+.step.on .num{color:var(--accent)}
+.step .nm{display:block;font-family:var(--disp);font-size:12.5px;font-weight:600;line-height:1.25}
+.step .sub{display:block;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:2px}
+.step .sub b{color:var(--warn);font-weight:500}
+.step.oos .nm{color:var(--ink-3)}
+
+.railsec{padding:11px 12px;border-top:1px solid var(--line)}
+.railsec:first-child{border-top:0}
+.railsec > .eyebrow{display:block;margin-bottom:8px}
+.radios{display:flex;flex-direction:column;gap:1px}
+.radio{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:start;text-align:left;
+  padding:6px 7px;border-radius:var(--r);width:100%;transition:background .12s}
+.radio:hover{background:var(--surface-2)}
+.radio.on{background:var(--surface-3)}
+.radio .box{width:11px;height:11px;border:1px solid var(--line-2);border-radius:50%;margin-top:4px;flex:0 0 auto}
+.radio.on .box{border-color:var(--accent);border-width:3px;background:var(--surface)}
+.radio .lbl{display:block;font-family:var(--disp);font-size:12px;font-weight:600}
+.radio .d{display:block;font-size:11px;color:var(--ink-2);line-height:1.35;margin-top:1px}
+.railrow{display:flex;gap:6px;flex-wrap:wrap}
+.notecard{font-size:11.5px;color:var(--ink-2);line-height:1.45}
+.notecard b{font-weight:600;color:var(--ink)}
+details.help{margin-top:8px}
+details.help summary{font-family:var(--disp);font-size:11px;font-weight:600;color:var(--data);cursor:pointer;list-style:none}
+details.help summary::-webkit-details-marker{display:none}
+details.help summary::before{content:"+ ";font-family:var(--mono)}
+details.help[open] summary::before{content:"– "}
+details.help .body{font-size:11.5px;color:var(--ink-2);line-height:1.5;margin-top:7px;display:flex;flex-direction:column;gap:6px}
+</style>
+<style>
+/* ---------- centre column ---------- */
+.main{display:flex;flex-direction:column;gap:14px;min-width:0}
+.structhead{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.structhead h2{font-size:21px;font-weight:700;letter-spacing:-.01em}
+.structhead .sh-sub{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.structhead .sh-sub code{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:thin}
+.tab{position:relative;padding:9px 14px 10px;font-family:var(--disp);font-size:12.5px;font-weight:600;
+  color:var(--ink-2);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .cnt{font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-left:6px}
+.tab .warnpip{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--warn);margin-left:6px;vertical-align:middle}
+
+.scopenote{display:flex;gap:9px;align-items:flex-start;padding:10px 12px;background:var(--data-soft);
+  border:1px solid var(--data-line);border-radius:var(--r);font-size:12px;color:var(--ink-2);line-height:1.45}
+.scopenote .ic{font-family:var(--mono);font-weight:500;color:var(--data);flex:0 0 auto}
+.scopenote b{color:var(--ink);font-weight:600}
+
+/* ---------- field ---------- */
+.field{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);position:relative}
+.field + .field{margin-top:10px}
+.field-h{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;padding:10px 12px 9px}
+.field-h .fname{font-family:var(--disp);font-size:14px;font-weight:600;letter-spacing:.005em}
+.field-h .fid{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);background:var(--surface-2);
+  border:1px solid var(--line);padding:1px 5px;border-radius:2px}
+.field-h .fgov{font-family:var(--mono);font-size:10.5px;color:var(--data)}
+.field-h .fsel{margin-left:auto;font-size:12px;color:var(--ink-2);text-align:right}
+.field-h .fsel b{color:var(--ink);font-weight:600}
+.field-b{padding:0 12px 12px}
+.field.oosf{opacity:.55}
+
+/* option grids */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.cards.spec{grid-template-columns:repeat(auto-fit,minmax(212px,1fr))}
+.opt{position:relative;text-align:left;border:1px solid var(--line-2);border-radius:var(--r);
+  background:var(--surface);padding:9px 10px;display:flex;flex-direction:column;gap:5px;
+  transition:border-color .12s,background .12s,box-shadow .12s}
+.opt:hover{border-color:var(--ink-3)}
+.opt .on-name{font-family:var(--disp);font-size:12.5px;font-weight:600;line-height:1.3}
+.opt .on-id{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.01em}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.opt.sel .on-id{color:var(--accent)}
+.opt.blk{border-color:var(--line);color:var(--ink-3);cursor:help;
+  background-image:repeating-linear-gradient(45deg,transparent 0 5px,var(--hatch) 5px 6px)}
+.opt.blk:hover{border-color:var(--warn)}
+.opt.blk .on-name{color:var(--ink-2)}
+.opt.blk.probe{border-color:var(--warn);box-shadow:inset 0 0 0 1px var(--warn)}
+.opt .flags{display:flex;gap:5px;align-items:center;margin-top:1px}
+.chip{font-family:var(--disp);font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+  padding:1.5px 5px;border-radius:2px;border:1px solid var(--line);color:var(--ink-3);background:var(--surface-2)}
+.chip.s{color:var(--ok);border-color:var(--ok-line);background:var(--ok-soft)}
+.chip.blkc{color:var(--warn);border-color:var(--warn-line);background:var(--warn-soft)}
+.spectab{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1px 10px;margin-top:4px;
+  border-top:1px solid var(--line);padding-top:6px}
+.spectab .sk{font-size:10.5px;color:var(--ink-3)}
+.spectab .sv{font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums;text-align:right;color:var(--ink-2)}
+.opt.sel .spectab{border-top-color:var(--accent-line)}
+.opt.sel .spectab .sv{color:var(--ink)}
+
+/* segmented */
+.seg{display:inline-flex;flex-wrap:wrap;gap:0;border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden}
+.segb{position:relative;padding:7px 12px;font-family:var(--disp);font-size:12px;font-weight:600;
+  border-right:1px solid var(--line-2);transition:background .12s}
+.segb:last-child{border-right:0}
+.segb:hover{background:var(--surface-2)}
+.segb.sel{background:var(--accent-fill);color:var(--on-accent)}
+.segb.blk{color:var(--ink-3);background-image:repeating-linear-gradient(45deg,transparent 0 5px,var(--hatch) 5px 6px)}
+.segb.blk.probe{box-shadow:inset 0 0 0 2px var(--warn)}
+.segb .sid{font-family:var(--mono);font-size:9.5px;opacity:.62;margin-left:6px}
+
+/* dropdown */
+.dd{position:relative;max-width:520px}
+.ddbtn{width:100%;display:flex;align-items:center;gap:10px;padding:8px 11px;border:1px solid var(--line-2);
+  border-radius:var(--r);background:var(--surface);text-align:left;transition:border-color .12s}
+.ddbtn:hover{border-color:var(--ink-3)}
+.ddbtn.open{border-color:var(--accent)}
+.ddbtn .dlab{font-size:13px;font-weight:500;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ddbtn .did{font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+.ddbtn .car{font-family:var(--mono);font-size:10px;color:var(--ink-3)}
+.ddpop{position:absolute;left:0;right:0;top:calc(100% + 3px);z-index:40;background:var(--surface);
+  border:1px solid var(--line-2);border-radius:var(--r);box-shadow:var(--shadow-pop);
+  max-height:272px;overflow-y:auto;padding:3px;scrollbar-width:thin}
+.ddi{width:100%;display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:2px;text-align:left;transition:background .1s}
+.ddi:hover{background:var(--surface-2)}
+.ddi .dnm{font-size:12.5px;flex:1 1 auto;min-width:0}
+.ddi .dcid{font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+.ddi.sel{background:var(--accent-soft);font-weight:600}
+.ddi.blk{color:var(--ink-3);background-image:repeating-linear-gradient(45deg,transparent 0 5px,var(--hatch) 5px 6px)}
+.ddi.blk .dnm{color:var(--ink-2)}
+
+/* ---------- blocked explain ---------- */
+.explain{margin:0 12px 12px;border:1px solid var(--warn-line);border-radius:var(--r);background:var(--warn-soft)}
+.explain-h{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:9px 11px;border-bottom:1px solid var(--warn-line)}
+.explain-h .ex-t{font-family:var(--disp);font-size:12.5px;font-weight:600}
+.explain-h .ex-r{font-family:var(--mono);font-size:10.5px;color:var(--warn)}
+.explain-h .ex-x{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink-3);padding:0 3px}
+.conds{display:flex;flex-direction:column;gap:0;padding:2px 0}
+.cond{display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px;padding:7px 11px;align-items:start}
+.cond + .cond{border-top:1px solid var(--warn-line)}
+.cond .cmark{font-family:var(--mono);font-size:11px;font-weight:500;padding-top:1px}
+.cond.met .cmark{color:var(--ok)}
+.cond.unmet .cmark{color:var(--warn)}
+.cond .ctext{font-size:12.5px;line-height:1.4}
+.cond .ctext b{font-weight:600}
+.cond .craw{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:3px}
+.cond .cwarn{font-size:11.5px;color:var(--warn);margin-top:3px}
+.explain-f{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:9px 11px;border-top:1px solid var(--warn-line)}
+.explain-f .fnote{font-size:11.5px;color:var(--ink-2)}
+
+/* ---------- inspector ---------- */
+.inspector{position:sticky;top:104px;align-self:start;max-height:calc(100vh - 122px);display:flex;flex-direction:column}
+@media (max-width:1300px){.inspector{position:static;max-height:none}}
+.itabs{display:flex;border-bottom:1px solid var(--line);flex:0 0 auto}
+.itab{flex:1 1 0;padding:9px 4px;font-family:var(--disp);font-size:11px;font-weight:600;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s}
+.itab:hover{color:var(--ink)}
+.itab.on{color:var(--ink);border-bottom-color:var(--data)}
+.itab .n{font-family:var(--mono);font-size:9.5px;letter-spacing:0;color:var(--ink-3);margin-left:4px}
+.ibody{overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:14px;scrollbar-width:thin}
+@media (min-width:1301px){.ibody{max-height:calc(100vh - 168px)}}
+@media (max-width:1300px){.ibody{max-height:520px}}
+.isec > .eyebrow{display:block;margin-bottom:7px}
+.isec + .isec{border-top:1px solid var(--line);padding-top:13px}
+
+.deflist{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 12px}
+.deflist .dt{font-size:12px;color:var(--ink-2);padding:4px 0;border-bottom:1px solid var(--line);min-width:0}
+.deflist .dd{font-family:var(--mono);font-size:11.5px;text-align:right;padding:4px 0;
+  border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+.deflist .dt:last-of-type,.deflist .dd:last-of-type{border-bottom:0}
+.deflist .dd.acc{color:var(--accent)}
+
+table.tbl{width:100%;border-collapse:collapse;font-size:12px}
+table.tbl th{font-family:var(--disp);font-size:9.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);text-align:left;padding:0 8px 5px 0;border-bottom:1px solid var(--line-2);white-space:nowrap}
+table.tbl th.num,table.tbl td.num{text-align:right;padding-right:0}
+table.tbl td{padding:5px 8px 5px 0;border-bottom:1px solid var(--line);vertical-align:top}
+table.tbl tr:last-child td{border-bottom:0}
+table.tbl td.code{font-family:var(--mono);font-size:11px;white-space:nowrap;color:var(--data)}
+table.tbl td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+table.tbl td.num.sum{color:var(--accent);font-weight:500}
+table.tbl td .src{font-family:var(--mono);font-size:10px;color:var(--ink-3);display:block;margin-top:2px}
+.tblwrap{overflow-x:auto;scrollbar-width:thin}
+
+/* trace */
+.pass{border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2);overflow:hidden}
+.pass + .pass{margin-top:7px}
+.pass.cur{border-color:var(--data);box-shadow:inset 0 0 0 1px var(--data)}
+.pass.osc{border-color:var(--warn-line);background:var(--warn-soft)}
+.pass > summary{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:7px 10px;cursor:pointer;list-style:none}
+.pass > summary::-webkit-details-marker{display:none}
+.pass > summary .pn{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--ink-2)}
+.pass.cur > summary .pn{color:var(--data)}
+.pass > summary .pchips{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto}
+.pchip{font-family:var(--mono);font-size:10px;padding:1px 5px;border-radius:2px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink-2);white-space:nowrap}
+.pchip.add{color:var(--ok);border-color:var(--ok-line);background:var(--ok-soft)}
+.pchip.rem{color:var(--warn);border-color:var(--warn-line);background:var(--warn-soft)}
+.pchip.rep{color:var(--data);border-color:var(--data-line);background:var(--data-soft)}
+.passbody{padding:0 10px 9px;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line)}
+.passbody .plabel{font-family:var(--disp);font-size:9.5px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3);margin-top:8px}
+.dline{font-size:11.5px;line-height:1.45;display:flex;gap:7px}
+.dline .dm{font-family:var(--mono);flex:0 0 auto}
+.dline.a .dm{color:var(--ok)}
+.dline.r .dm{color:var(--warn)}
+.dline.p .dm{color:var(--data)}
+.dline .rid{font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+.firedlist{display:flex;flex-wrap:wrap;gap:4px}
+.firedlist .fr{font-family:var(--mono);font-size:10px;padding:1px 4px;border:1px solid var(--line);
+  border-radius:2px;color:var(--ink-2);background:var(--surface)}
+.firedlist .fr.cyc{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
+
+/* rule inspector */
+.rulesearch{width:100%;font-family:var(--mono);font-size:11.5px;padding:6px 9px;border:1px solid var(--line-2);
+  border-radius:var(--r);background:var(--surface);color:var(--ink)}
+.rule{border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2);padding:8px 10px}
+.rule + .rule{margin-top:6px}
+.rule.fires{border-color:var(--ok-line);background:var(--ok-soft)}
+.rule.cycflag{border-color:var(--warn);background:var(--warn-soft)}
+.rule-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rule-h .rid2{font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+.rule-h .rst{font-family:var(--disp);font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+  margin-left:auto;padding:1px 5px;border-radius:2px;border:1px solid var(--line);color:var(--ink-3);background:var(--surface)}
+.rule-h .rst.y{color:var(--ok);border-color:var(--ok-line)}
+.rule-h .rst.n{color:var(--ink-3)}
+.rule .rimp{font-size:12px;margin-top:3px}
+.rule .rimp b{font-weight:600}
+.rule .rimp .lv{font-family:var(--mono);font-size:10px;color:var(--data);border:1px solid var(--data-line);
+  background:var(--data-soft);padding:0 4px;border-radius:2px;margin-left:5px}
+.rule .rconds{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.rule .rc{font-family:var(--mono);font-size:10.5px;display:flex;gap:6px;align-items:baseline}
+.rule .rc .m{flex:0 0 auto}
+.rule .rc.y .m{color:var(--ok)}
+.rule .rc.n .m{color:var(--warn)}
+.rule .rc .x{color:var(--ink-2);word-break:break-all}
+.rule .rc.n .x{color:var(--ink)}
+.grammar{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;font-size:11.5px;align-items:baseline}
+.grammar code{font-family:var(--mono);font-size:10.5px;color:var(--data);white-space:nowrap}
+.grammar .g-d{color:var(--ink-2);line-height:1.4}
+.callout{border-left:2px solid var(--warn);background:var(--warn-soft);padding:8px 10px;font-size:11.5px;
+  color:var(--ink-2);line-height:1.5}
+.callout b{color:var(--ink);font-weight:600}
+pre.json{font-family:var(--mono);font-size:10.5px;line-height:1.5;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:var(--r);padding:9px;overflow-x:auto;margin:0;color:var(--ink-2);scrollbar-width:thin}
+pre.json .jk{color:var(--data)}
+pre.json .jv{color:var(--accent)}
+
+/* step banner */
+.stepbanner{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:9px 12px;
+  background:var(--data-soft);border:1px solid var(--data-line);border-radius:var(--r)}
+.stepbanner .sb-t{font-family:var(--disp);font-size:12.5px;font-weight:600;color:var(--data)}
+.stepbanner .sb-d{font-size:11.5px;color:var(--ink-2);flex:1 1 160px}
+.stepbanner .sb-a{display:flex;gap:6px;margin-left:auto}
+
+/* toasts */
+.toasts{position:fixed;left:18px;bottom:18px;z-index:90;display:flex;flex-direction:column;gap:7px;max-width:392px}
+.toast{background:var(--surface);border:1px solid var(--line-2);border-left:2px solid var(--data);
+  border-radius:var(--r);box-shadow:var(--shadow-pop);padding:9px 11px;font-size:12px;line-height:1.45;
+  animation:slidein .22s ease-out}
+.toast .tt{font-family:var(--disp);font-size:11.5px;font-weight:600;margin-bottom:2px}
+.toast .tb{color:var(--ink-2)}
+.toast .tb code{font-family:var(--mono);font-size:11px;color:var(--ink)}
+.toast.warn{border-left-color:var(--warn)}
+.toast.warn .tt{color:var(--warn)}
+@keyframes slidein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.toast{animation:none}}
+</style>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="mark">HIAB</span>
+    <span class="prod">Configurator</span>
+    <span class="ver">2.0</span>
+  </div>
+  <div class="sep"></div>
+  <div class="topmeta">
+    <div class="kv"><span class="k">Model</span><span class="v" id="m-model">—</span></div>
+    <div class="kv"><span class="k">Market</span><span class="v"><select class="ctl" id="marketsel"></select></span></div>
+    <div class="kv"><span class="k">Configuration ID</span><span class="v" id="m-cfgid">—</span></div>
+    <div class="kv"><span class="k">Autosave</span><span class="v" id="m-saved">—</span></div>
+  </div>
+  <div class="topact">
+    <span class="demotag">PoC demo · synthetic data</span>
+    <button class="btn sm" id="btn-new">New configuration</button>
+  </div>
+</div>
+
+<div class="telemetry" id="telemetry"></div>
+
+<div class="shell">
+  <div class="rail">
+    <div class="panel"><div class="steps" id="steps"></div></div>
+    <div class="panel" id="railctl"></div>
+    <div class="panel" id="railabout"></div>
+  </div>
+  <div class="main" id="main"></div>
+  <div class="panel inspector" id="inspector"></div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<script>
+/* ==========================================================================
+   MASTER DATA  —  synthetic, Hiab-shaped. Mirrors the PFMP/CSV column
+   structure described in the design document:
+     PRODUCT               FamilyGroupID / FamilyID / ComponentID / UICode / SortOrder
+     COMP_MARKET           ModelID + MarketID + ComponentID + SOCode (S=default, O=published)
+     COMP_RULES            ModelID + ImpactFamilyID + ImpactID + Rule1..Rule91
+     COMP_RULES_PRODUCTION ModelID + ImpactID + ImpactQty + Rule1..Rule91
+   ========================================================================== */
+
+const MODEL = 'X-HIPRO-E';
+const MARKETS = [
+  {id:'EU',   name:'Europe'},
+  {id:'NA',   name:'North America'},
+  {id:'APAC', name:'Asia-Pacific'}
+];
+
+const STRUCTURES = [
+  {id:'LC', name:'Loader crane',              groups:['FG1','FG2','FG3','FG4']},
+  {id:'IA', name:'Installation & accessories', groups:['FG5','FG6','FG7','FG8']},
+  {id:'CT', name:'Contracts',                  groups:['FG9','FG10']}
+];
+
+const GROUPS = {
+  FG1:{name:'Base & column',      structure:'LC'},
+  FG2:{name:'Boom system',        structure:'LC'},
+  FG3:{name:'Control system',     structure:'LC'},
+  FG4:{name:'Stabilisers',        structure:'LC'},
+  FG5:{name:'Chassis & scope',    structure:'IA'},
+  FG6:{name:'Hydraulics',         structure:'IA'},
+  FG7:{name:'Subframe & body',    structure:'IA'},
+  FG8:{name:'Accessories',        structure:'IA'},
+  FG9:{name:'Service contract',   structure:'CT'},
+  FG10:{name:'Warranty & finance',structure:'CT'}
+};
+
+/* UICode drives the selector type — the generative-UI mapping.
+   spec = custom selector (the "escape hatch" for a key sales-option family). */
+const FAMILIES = {
+  A10:{name:'Capacity class',          group:'FG1', ui:'spec',     sort:10},
+  A20:{name:'Column & slewing',        group:'FG1', ui:'dropdown', sort:20},
+  A30:{name:'Corrosion class',         group:'FG1', ui:'segment',  sort:30},
+  B10:{name:'Hydraulic extensions',    group:'FG2', ui:'card',     sort:10},
+  B20:{name:'Jib',                     group:'FG2', ui:'dropdown', sort:20},
+  B30:{name:'Manual extensions',       group:'FG2', ui:'segment',  sort:30},
+  B40:{name:'Rope winch',              group:'FG2', ui:'dropdown', sort:40},
+  C10:{name:'Control system',          group:'FG3', ui:'card',     sort:10},
+  C20:{name:'Radio remote control',    group:'FG3', ui:'dropdown', sort:20},
+  C30:{name:'Stability system',        group:'FG3', ui:'dropdown', sort:30},
+  C40:{name:'Crane tip control',       group:'FG3', ui:'segment',  sort:40},
+  D10:{name:'Stabiliser legs',         group:'FG4', ui:'dropdown', sort:10},
+  D20:{name:'Additional stabilisers',  group:'FG4', ui:'segment',  sort:20},
+  E10:{name:'Truck make',              group:'FG5', ui:'dropdown', sort:10},
+  E20:{name:'Chassis configuration',   group:'FG5', ui:'card',     sort:20},
+  E30:{name:'Wheelbase',               group:'FG5', ui:'dropdown', sort:30},
+  E40:{name:'Installation scope',      group:'FG5', ui:'segment',  sort:40},
+  F10:{name:'Pump',                    group:'FG6', ui:'card',     sort:10},
+  F20:{name:'Oil tank',                group:'FG6', ui:'dropdown', sort:20},
+  F30:{name:'Oil cooler',              group:'FG6', ui:'segment',  sort:30},
+  G10:{name:'Subframe',                group:'FG7', ui:'card',     sort:10},
+  G20:{name:'Crane position',          group:'FG7', ui:'segment',  sort:20},
+  G30:{name:'Body type',               group:'FG7', ui:'dropdown', sort:30},
+  H10:{name:'Tool box',                group:'FG8', ui:'dropdown', sort:10},
+  H20:{name:'Work lighting',           group:'FG8', ui:'segment',  sort:20},
+  H30:{name:'Remote control holder',   group:'FG8', ui:'segment',  sort:30},
+  J10:{name:'Service contract',        group:'FG9', ui:'card',     sort:10},
+  J20:{name:'Contract term',           group:'FG9', ui:'segment',  sort:20},
+  J30:{name:'Connectivity',            group:'FG9', ui:'dropdown', sort:30},
+  K10:{name:'Extended warranty',       group:'FG10',ui:'dropdown', sort:10},
+  K20:{name:'Financing',               group:'FG10',ui:'segment',  sort:20}
+};
+
+/* ComponentID / name / SortOrder / SOCode / attributes / market exceptions.
+   `spec` rows surface in the custom capacity-class selector. */
+const COMPONENTS = {
+  A1001:{f:'A10',n:'X-HiPro 192 E-5',s:10,so:'O',spec:{'Lift moment':'12.8 tm','Max outreach':'15.9 m','Max lift':'6 100 kg'}},
+  A1002:{f:'A10',n:'X-HiPro 232 E-6',s:20,so:'S',spec:{'Lift moment':'17.9 tm','Max outreach':'18.2 m','Max lift':'7 400 kg'}},
+  A1003:{f:'A10',n:'X-HiPro 302 E-7',s:30,so:'O',spec:{'Lift moment':'23.5 tm','Max outreach':'20.6 m','Max lift':'9 200 kg'}},
+
+  A2001:{f:'A20',n:'Endless slewing, 2× rack and pinion',s:10,so:'S'},
+  A2002:{f:'A20',n:'Endless slewing, 4× rack and pinion',s:20,so:'O'},
+  A2003:{f:'A20',n:'Limited slewing, 415°',s:30,so:'O'},
+
+  A3001:{f:'A30',n:'Standard paint, C3',s:10,so:'S'},
+  A3002:{f:'A30',n:'Marine coating, C5-M',s:20,so:'O',markets:['EU','APAC']},
+
+  B1001:{f:'B10',n:'2 hydraulic extensions',s:10,so:'S',attrs:{num:2}},
+  B1002:{f:'B10',n:'4 hydraulic extensions',s:20,so:'O',attrs:{num:4}},
+  B1003:{f:'B10',n:'6 hydraulic extensions',s:30,so:'O',attrs:{num:6}},
+
+  B2000:{f:'B20',n:'No jib',s:10,so:'S'},
+  B2001:{f:'B20',n:'Jib 70X-2',s:20,so:'O'},
+  B2002:{f:'B20',n:'Jib 100X-4',s:30,so:'O'},
+
+  B3000:{f:'B30',n:'None',s:10,so:'S'},
+  B3001:{f:'B30',n:'1 manual extension',s:20,so:'O'},
+  B3002:{f:'B30',n:'2 manual extensions',s:30,so:'O'},
+
+  B4000:{f:'B40',n:'No winch',s:10,so:'S'},
+  B4001:{f:'B40',n:'Rope winch, 1 100 kg',s:20,so:'O'},
+  B4002:{f:'B40',n:'Rope winch, 2 200 kg',s:30,so:'O'},
+
+  C1001:{f:'C10',n:'CLX, manual lever control',s:10,so:'S'},
+  C1002:{f:'C10',n:'HiDuo, dual manual control',s:20,so:'O'},
+  C1003:{f:'C10',n:'SPACE 5000 with HiPro',s:30,so:'O'},
+
+  C2000:{f:'C20',n:'No remote control',s:10,so:'S'},
+  C2001:{f:'C20',n:'CombiDrive 3',s:20,so:'O'},
+  C2002:{f:'C20',n:'CombiDrive 4 with display',s:30,so:'O'},
+
+  C3000:{f:'C30',n:'None',s:10,so:'S'},
+  C3001:{f:'C30',n:'ASC, automatic stability control',s:20,so:'O'},
+  C3002:{f:'C30',n:'HiPro Plus with VSL',s:30,so:'O'},
+
+  C4000:{f:'C40',n:'Not included',s:10,so:'S'},
+  C4001:{f:'C40',n:'CTC crane tip control',s:20,so:'O'},
+
+  D1001:{f:'D10',n:'Standard hydraulic legs',s:10,so:'S'},
+  D1002:{f:'D10',n:'Manually extendable legs',s:20,so:'O'},
+  D1003:{f:'D10',n:'Hydraulically extendable legs',s:30,so:'O'},
+
+  D2000:{f:'D20',n:'None',s:10,so:'S'},
+  D2001:{f:'D20',n:'Rear stabiliser set',s:20,so:'O'},
+
+  E1001:{f:'E10',n:'Volvo FH',s:10,so:'S'},
+  E1002:{f:'E10',n:'Scania R',s:20,so:'O'},
+  E1003:{f:'E10',n:'Mercedes-Benz Actros',s:30,so:'O'},
+  E1004:{f:'E10',n:'MAN TGS',s:40,so:'O'},
+
+  E2001:{f:'E20',n:'4×2',s:10,so:'O',attrs:{Fit:['light']}},
+  E2002:{f:'E20',n:'6×2',s:20,so:'S',attrs:{Fit:['medium']}},
+  E2003:{f:'E20',n:'6×4',s:30,so:'O',attrs:{Fit:['medium','heavy']}},
+  E2004:{f:'E20',n:'8×4',s:40,so:'O',attrs:{Fit:['heavy']}},
+
+  E3001:{f:'E30',n:'3 800 mm',s:10,so:'O',attrs:{num:3800}},
+  E3002:{f:'E30',n:'4 500 mm',s:20,so:'S',attrs:{num:4500}},
+  E3003:{f:'E30',n:'5 300 mm',s:30,so:'O',attrs:{num:5300}},
+  E3004:{f:'E30',n:'6 000 mm',s:40,so:'O',attrs:{num:6000}},
+
+  E4001:{f:'E40',n:'Installation by Hiab',s:10,so:'S'},
+  E4002:{f:'E40',n:'Chassis only, customer installs',s:20,so:'O'},
+
+  F1001:{f:'F10',n:'PTO gear pump, fixed displacement',s:10,so:'S',
+         attrs:{PumpFlow:65,FlowType:'Fixed'},spec:{'Delivery':'65 l/min','Type':'Fixed'}},
+  F1002:{f:'F10',n:'Variable displacement pump',s:20,so:'O',
+         attrs:{PumpFlow:120,FlowType:'Variable'},spec:{'Delivery':'120 l/min','Type':'Variable'}},
+  F1003:{f:'F10',n:'Electro-hydraulic e-pump',s:30,so:'O',markets:['EU'],
+         attrs:{PumpFlow:90,FlowType:'Variable'},spec:{'Delivery':'90 l/min','Type':'Variable'}},
+
+  F2001:{f:'F20',n:'Oil tank, 80 l side mounted',s:10,so:'S',attrs:{num:80}},
+  F2002:{f:'F20',n:'Oil tank, 130 l side mounted',s:20,so:'O',attrs:{num:130}},
+  F2003:{f:'F20',n:'Oil tank, 200 l behind cab',s:30,so:'O',attrs:{num:200}},
+
+  F3000:{f:'F30',n:'None',s:10,so:'S'},
+  F3001:{f:'F30',n:'Fan oil cooler',s:20,so:'O'},
+
+  G1001:{f:'G10',n:'Bolted subframe',s:10,so:'S',attrs:{Fit:['light','medium']}},
+  G1002:{f:'G10',n:'Welded subframe',s:20,so:'O',attrs:{Fit:['medium','heavy']}},
+  G1003:{f:'G10',n:'Torsion-free subframe',s:30,so:'O',attrs:{Fit:['heavy']}},
+
+  G2001:{f:'G20',n:'Behind cab',s:10,so:'S'},
+  G2002:{f:'G20',n:'Rear mounted',s:20,so:'O'},
+
+  G3001:{f:'G30',n:'Flatbed platform',s:10,so:'S'},
+  G3002:{f:'G30',n:'Dropside body',s:20,so:'O'},
+  G3003:{f:'G30',n:'Container twist-lock frame',s:30,so:'O'},
+
+  H1000:{f:'H10',n:'None',s:10,so:'S'},
+  H1001:{f:'H10',n:'Tool box, aluminium 600 l',s:20,so:'O'},
+  H1002:{f:'H10',n:'Tool box, steel 400 l',s:30,so:'O',markets:['NA','APAC']},
+
+  H2000:{f:'H20',n:'None',s:10,so:'S'},
+  H2001:{f:'H20',n:'LED work light kit',s:20,so:'O'},
+  H2002:{f:'H20',n:'LED work light and beacon kit',s:30,so:'O'},
+
+  H3000:{f:'H30',n:'None',s:10,so:'S'},
+  H3001:{f:'H30',n:'In-cab charging holder',s:20,so:'O'},
+
+  J1000:{f:'J10',n:'No contract',s:10,so:'S'},
+  J1001:{f:'J10',n:'ProCare Essential',s:20,so:'O'},
+  J1002:{f:'J10',n:'ProCare Advanced',s:30,so:'O'},
+  J1003:{f:'J10',n:'ProCare Complete',s:40,so:'O',markets:['EU','NA']},
+
+  J2001:{f:'J20',n:'24 months',s:10,so:'S',attrs:{num:24}},
+  J2002:{f:'J20',n:'36 months',s:20,so:'O',attrs:{num:36}},
+  J2003:{f:'J20',n:'60 months',s:30,so:'O',attrs:{num:60}},
+
+  J3000:{f:'J30',n:'None',s:10,so:'S'},
+  J3001:{f:'J30',n:'HiConnect Basic',s:20,so:'O'},
+  J3002:{f:'J30',n:'HiConnect Pro',s:30,so:'O'},
+
+  K1000:{f:'K10',n:'Standard, 12 months',s:10,so:'S'},
+  K1001:{f:'K10',n:'Extended, +12 months',s:20,so:'O'},
+  K1002:{f:'K10',n:'Extended, +24 months',s:30,so:'O'},
+
+  K2000:{f:'K20',n:'None',s:10,so:'S'},
+  K2001:{f:'K20',n:'Lease, 36 months',s:20,so:'O'},
+  K2002:{f:'K20',n:'Instalment plan',s:30,so:'O',markets:['EU','NA']}
+};
+
+/* Computed configurator fields — referenced by rules as --FieldName. */
+const COMPUTED = {
+  CraneMinFlow:{
+    label:'Required oil flow', unit:'l/min',
+    formula:'base(Capacity class) + 10 if 6 extensions + 5 if winch fitted',
+    fn:sel=>{
+      let v = {A1001:65,A1002:90,A1003:105}[sel.A10] || 0;
+      if(sel.B10==='B1003') v += 10;
+      if(sel.B40 && sel.B40!=='B4000') v += 5;
+      return v;
+    }
+  },
+  BoomReach:{
+    label:'Total boom reach', unit:'m',
+    formula:'outreach(Capacity class) + jib + manual extensions',
+    fn:sel=>{
+      let v = {A1001:15.9,A1002:18.2,A1003:20.6}[sel.A10] || 0;
+      v += {B2001:4.4,B2002:7.5}[sel.B20] || 0;
+      v += {B3001:0.8,B3002:1.6}[sel.B30] || 0;
+      return Math.round(v*10)/10;
+    }
+  }
+};
+
+/* ---- COMP_RULES : sales rules -------------------------------------------
+   target.kind: 'component' | 'family' | 'group'  (Appendices 3–5 all three)
+   Multiple rows for the same target are OR-ed; conditions within a row AND. */
+const SALES_RULES = [
+  {id:'R-LC-001',t:{k:'component',id:'A2002'},c:['A10..==A1003']},
+  {id:'R-LC-002',t:{k:'component',id:'A2003'},c:['A10..==A1001|A1002']},
+  {id:'R-LC-010',t:{k:'component',id:'B1002'},c:['A10..==A1002|A1003']},
+  {id:'R-LC-011',t:{k:'component',id:'B1003'},c:['A10..==A1003']},
+  {id:'R-LC-012',t:{k:'component',id:'B2001'},c:['B10..==B1002|B1003']},
+  {id:'R-LC-013',t:{k:'component',id:'B2002'},c:['B10..==B1003','C10..==C1003']},
+  {id:'R-LC-014',t:{k:'component',id:'B3001'},c:['B20..==B2000']},
+  {id:'R-LC-015',t:{k:'component',id:'B3002'},c:['B20..==B2000','B10..==B1002|B1003']},
+  {id:'R-LC-016',t:{k:'component',id:'B4001'},c:['B10..==B1002|B1003']},
+  {id:'R-LC-017',t:{k:'component',id:'B4002'},c:['B10..==B1003','C10..==C1003']},
+  {id:'R-LC-020',t:{k:'component',id:'C1002'},c:['A10..==A1002|A1003']},
+  {id:'R-LC-021',t:{k:'component',id:'C1003'},c:['A10..==A1002|A1003']},
+  {id:'R-LC-022',t:{k:'component',id:'C2001'},c:['C10..<>C1001']},
+  {id:'R-LC-023',t:{k:'component',id:'C2002'},c:['C10..==C1003']},
+  {id:'R-LC-024',t:{k:'component',id:'C3001'},c:['C10..==C1003','D10..==D1003']},
+  {id:'R-LC-025',t:{k:'component',id:'C3002'},c:['C10..==C1003','D10..==D1003','B10..==B1003']},
+  {id:'R-LC-026',t:{k:'component',id:'C4001'},c:['C30..==C3001|C3002','C20..<>C2000']},
+  {id:'R-LC-030',t:{k:'component',id:'D1003'},c:['A10..==A1002|A1003']},
+  {id:'R-LC-031',t:{k:'component',id:'D2001'},c:['A10..==A1003']},
+  {id:'R-LC-032',t:{k:'component',id:'D2001'},c:['B10..==B1003','D10..==D1003']},
+
+  /* group-level impacts — whole family group in/out of the solution space */
+  {id:'R-IA-001',t:{k:'group',id:'FG6'},c:['E40..==E4001']},
+  {id:'R-IA-002',t:{k:'group',id:'FG7'},c:['E40..==E4001']},
+  /* family-level impact, cross-structure */
+  {id:'R-IA-003',t:{k:'family',id:'H30'},c:['C20..<>C2000']},
+
+  {id:'R-IA-010',t:{k:'component',id:'E2001'},c:['A10..==A1001']},
+  {id:'R-IA-011',t:{k:'component',id:'E2002'},c:['A10..==A1001|A1002']},
+  {id:'R-IA-012',t:{k:'component',id:'E2004'},c:['A10..==A1003']},
+  {id:'R-IA-013',t:{k:'component',id:'E3001'},c:['A10..==A1001']},
+  {id:'R-IA-014',t:{k:'component',id:'E3004'},c:['E20..==E2003|E2004']},
+
+  /* cross-field numeric comparison — assumption 2 in the architecture doc */
+  {id:'R-IA-020',t:{k:'component',id:'F1001'},c:['PumpFlow..>=--CraneMinFlow']},
+  {id:'R-IA-021',t:{k:'component',id:'F1002'},c:['PumpFlow..>=--CraneMinFlow']},
+  {id:'R-IA-022',t:{k:'component',id:'F1003'},c:['PumpFlow..>=--CraneMinFlow','C10..==C1003']},
+  {id:'R-IA-023',t:{k:'component',id:'F2002'},c:['CraneMinFlow..>=90']},
+  {id:'R-IA-024',t:{k:'component',id:'F2003'},c:['CraneMinFlow..>=105']},
+  /* attribute condition on a selected component */
+  {id:'R-IA-025',t:{k:'component',id:'F3001'},c:['FlowType..==Variable']},
+
+  /* shared-attribute matching */
+  {id:'R-IA-030',t:{k:'component',id:'G1001'},c:['E20..~=Fit']},
+  {id:'R-IA-031',t:{k:'component',id:'G1002'},c:['E20..~=Fit']},
+  {id:'R-IA-032',t:{k:'component',id:'G1003'},c:['E20..~=Fit']},
+  {id:'R-IA-033',t:{k:'component',id:'G2002'},c:['G30..==G3001|G3002']},
+  {id:'R-IA-034',t:{k:'component',id:'G3003'},c:['E20..==E2003|E2004','G20..==G2001','BoomReach..>=18']},
+
+  /* comparison operators on a numeric attribute */
+  {id:'R-IA-040',t:{k:'component',id:'H1001'},c:['E30..>=4500']},
+  {id:'R-IA-041',t:{k:'component',id:'H1002'},c:['E30..>=3800']},
+  {id:'R-IA-042',t:{k:'component',id:'H2002'},c:['G30..==G3001|G3002']},
+
+  {id:'R-CT-001',t:{k:'component',id:'J3001'},c:['C10..<>C1001']},
+  {id:'R-CT-002',t:{k:'component',id:'J3002'},c:['C10..==C1003']},
+  {id:'R-CT-011',t:{k:'component',id:'J1002'},c:['J30..==J3001|J3002']},
+  {id:'R-CT-012',t:{k:'component',id:'J1003'},c:['J30..==J3002','C30..<>C3000']},
+  {id:'R-CT-020',t:{k:'component',id:'J2003'},c:['J10..==J1002|J1003']},
+  {id:'R-CT-030',t:{k:'component',id:'K1001'},c:['J10..<>J1000']},
+  {id:'R-CT-031',t:{k:'component',id:'K1002'},c:['J10..==J1002|J1003','J20..==J2003']},
+  {id:'R-CT-040',t:{k:'component',id:'K2001'},c:['E40..==E4001']},
+  {id:'R-CT-041',t:{k:'component',id:'K2002'},c:['E40..==E4001']}
+];
+
+/* Deliberately cyclic set, injected on demand from the rule lab.
+   Corrosion class and stabiliser legs are made to cross-depend: each
+   option requires the *other* option in the paired family. Every pass
+   invalidates the current selection, so the cascade walks a 4-state loop
+   and never reaches a fixed point. Both families are otherwise ungoverned,
+   so the loop is attributable to these rows alone. */
+const CYCLIC_RULES = [
+  {id:'R-LAB-901',t:{k:'component',id:'A3001'},c:['D10..==D1001'],lab:true},
+  {id:'R-LAB-902',t:{k:'component',id:'A3002'},c:['D10..==D1002'],lab:true},
+  {id:'R-LAB-903',t:{k:'component',id:'D1001'},c:['A30..==A3002'],lab:true},
+  {id:'R-LAB-904',t:{k:'component',id:'D1002'},c:['A30..==A3001'],lab:true},
+  /* keeps the paired family binary, so the loop has no third option to
+     escape into — without this the cascade finds a fixed point instead */
+  {id:'R-LAB-905',t:{k:'component',id:'D1003'},c:['A30..==Blank'],lab:true}
+];
+
+/* ---- COMP_RULES_PRODUCTION : manufacturing rules → MBOM ----------------- */
+const PROD_RULES = [
+  {id:'P-LC-001',c:['A10..==A1001'],code:'993-01192',n:'Crane base assembly, X-HiPro 192',q:1},
+  {id:'P-LC-002',c:['A10..==A1002'],code:'993-01232',n:'Crane base assembly, X-HiPro 232',q:1},
+  {id:'P-LC-003',c:['A10..==A1003'],code:'993-01302',n:'Crane base assembly, X-HiPro 302',q:1},
+  {id:'P-LC-010',c:['A20..==A2001'],code:'771-02020',n:'Slew unit, 2× rack and pinion',q:1},
+  {id:'P-LC-011',c:['A20..==A2002'],code:'771-02040',n:'Slew unit, 4× rack and pinion',q:1},
+  {id:'P-LC-012',c:['A20..==A2003'],code:'771-02415',n:'Slew unit, limited 415°',q:1},
+  {id:'P-LC-020',c:['A30..==A3002'],code:'810-05500',n:'Coating set, C5-M marine',q:1},
+  {id:'P-LC-030',c:['B10..==B1001'],code:'645-11010',n:'Extension cylinder, boom',q:2},
+  {id:'P-LC-031',c:['B10..==B1001'],code:'645-11900',n:'Hose set, extension',q:2},
+  {id:'P-LC-032',c:['B10..==B1002'],code:'645-11010',n:'Extension cylinder, boom',q:4},
+  {id:'P-LC-033',c:['B10..==B1002'],code:'645-11900',n:'Hose set, extension',q:4},
+  {id:'P-LC-034',c:['B10..==B1003'],code:'645-11010',n:'Extension cylinder, boom',q:6},
+  {id:'P-LC-035',c:['B10..==B1003'],code:'645-11900',n:'Hose set, extension',q:6},
+  {id:'P-LC-040',c:['B20..==B2001'],code:'662-07002',n:'Jib 70X-2 assembly',q:1},
+  {id:'P-LC-041',c:['B20..==B2001'],code:'645-11010',n:'Extension cylinder, boom',q:2},
+  {id:'P-LC-042',c:['B20..==B2001'],code:'645-11900',n:'Hose set, extension',q:2},
+  {id:'P-LC-043',c:['B20..==B2002'],code:'662-10004',n:'Jib 100X-4 assembly',q:1},
+  {id:'P-LC-044',c:['B20..==B2002'],code:'645-11010',n:'Extension cylinder, boom',q:4},
+  {id:'P-LC-045',c:['B20..==B2002'],code:'645-11900',n:'Hose set, extension',q:4},
+  {id:'P-LC-050',c:['B30..==B3001'],code:'648-30001',n:'Manual extension, 800 mm',q:1},
+  {id:'P-LC-051',c:['B30..==B3002'],code:'648-30001',n:'Manual extension, 800 mm',q:2},
+  {id:'P-LC-060',c:['B40..==B4001'],code:'703-11000',n:'Rope winch, 1 100 kg',q:1},
+  {id:'P-LC-061',c:['B40..==B4002'],code:'703-22000',n:'Rope winch, 2 200 kg',q:1},
+  {id:'P-LC-062',c:['B40..<>B4000'],code:'703-11900',n:'Winch hydraulics kit',q:1},
+  {id:'P-LC-070',c:['C10..==C1001'],code:'315-01001',n:'Control valve, CLX',q:1},
+  {id:'P-LC-071',c:['C10..==C1002'],code:'315-02001',n:'Control valve, HiDuo',q:1},
+  {id:'P-LC-072',c:['C10..==C1002'],code:'315-09010',n:'CAN harness, main',q:1},
+  {id:'P-LC-073',c:['C10..==C1003'],code:'315-50001',n:'Control unit, SPACE 5000',q:1},
+  {id:'P-LC-074',c:['C10..==C1003'],code:'315-50010',n:'HiPro valve block',q:1},
+  {id:'P-LC-075',c:['C10..==C1003'],code:'315-09010',n:'CAN harness, main',q:1},
+  {id:'P-LC-080',c:['C20..==C2001'],code:'322-30003',n:'Transmitter, CombiDrive 3',q:1},
+  {id:'P-LC-081',c:['C20..==C2002'],code:'322-40004',n:'Transmitter, CombiDrive 4 with display',q:1},
+  {id:'P-LC-082',c:['C20..<>C2000'],code:'322-30900',n:'Receiver kit, radio',q:1},
+  {id:'P-LC-090',c:['C30..==C3001'],code:'331-01001',n:'Sensor kit, ASC',q:1},
+  {id:'P-LC-091',c:['C30..==C3001'],code:'315-09010',n:'CAN harness, main',q:1},
+  {id:'P-LC-092',c:['C30..==C3002'],code:'331-02001',n:'Sensor kit, HiPro Plus VSL',q:1},
+  {id:'P-LC-093',c:['C30..==C3002'],code:'315-09010',n:'CAN harness, main',q:2},
+  {id:'P-LC-100',c:['C40..==C4001'],code:'337-01001',n:'Crane tip control kit',q:1},
+  {id:'P-LC-110',c:['D10..==D1001'],code:'412-01002',n:'Stabiliser leg, standard hydraulic',q:2},
+  {id:'P-LC-111',c:['D10..==D1002'],code:'412-02002',n:'Stabiliser leg, manually extendable',q:2},
+  {id:'P-LC-112',c:['D10..==D1003'],code:'412-03002',n:'Stabiliser leg, hydraulically extendable',q:2},
+  {id:'P-LC-120',c:['D20..==D2001'],code:'413-01001',n:'Rear stabiliser beam',q:1},
+  {id:'P-LC-121',c:['D20..==D2001'],code:'412-01002',n:'Stabiliser leg, standard hydraulic',q:2},
+  {id:'P-LC-122',c:['D20..==D2001','A10..==A1003'],code:'413-01900',n:'Reinforcement plate set, 302',q:1},
+
+  {id:'P-IA-001',c:['F10..==F1001'],code:'511-06500',n:'Gear pump, 65 l/min',q:1},
+  {id:'P-IA-002',c:['F10..==F1002'],code:'511-12000',n:'Variable displacement pump, 120 l/min',q:1},
+  {id:'P-IA-003',c:['F10..==F1001|F1002'],code:'511-09001',n:'PTO drive kit',q:1},
+  {id:'P-IA-004',c:['F10..==F1003'],code:'511-09000',n:'e-pump unit, 90 l/min',q:1},
+  {id:'P-IA-005',c:['F10..==F1003'],code:'511-09500',n:'Battery and inverter kit',q:1},
+  {id:'P-IA-010',c:['F20..==F2001'],code:'521-00080',n:'Oil tank, 80 l',q:1},
+  {id:'P-IA-011',c:['F20..==F2002'],code:'521-00130',n:'Oil tank, 130 l',q:1},
+  {id:'P-IA-012',c:['F20..==F2003'],code:'521-00200',n:'Oil tank, 200 l',q:1},
+  {id:'P-IA-020',c:['F30..==F3001'],code:'531-01001',n:'Fan oil cooler',q:1},
+  {id:'P-IA-021',c:['F30..==F3001'],code:'531-01900',n:'Cooler hose kit',q:1},
+  {id:'P-IA-030',c:['G10..==G1001'],code:'610-01001',n:'Subframe, bolted',q:1},
+  {id:'P-IA-031',c:['G10..==G1001'],code:'610-01010',n:'U-bolt, M20',q:12},
+  {id:'P-IA-032',c:['G10..==G1001','E20..==E2004'],code:'610-01010',n:'U-bolt, M20',q:4},
+  {id:'P-IA-033',c:['G10..==G1002'],code:'610-02001',n:'Subframe, welded',q:1},
+  {id:'P-IA-034',c:['G10..==G1003'],code:'610-03001',n:'Subframe, torsion-free',q:1},
+  {id:'P-IA-035',c:['G10..==G1003'],code:'610-01010',n:'U-bolt, M20',q:16},
+  {id:'P-IA-040',c:['G30..==G3001'],code:'631-01001',n:'Flatbed platform',q:1},
+  {id:'P-IA-041',c:['G30..==G3002'],code:'631-02001',n:'Dropside body',q:1},
+  {id:'P-IA-042',c:['G30..==G3003'],code:'631-03001',n:'Twist-lock container frame',q:1},
+  {id:'P-IA-050',c:['H10..==H1001'],code:'715-06001',n:'Tool box, aluminium 600 l',q:1},
+  {id:'P-IA-051',c:['H10..==H1002'],code:'715-04001',n:'Tool box, steel 400 l',q:1},
+  {id:'P-IA-052',c:['H10..<>H1000'],code:'715-00900',n:'Mounting bracket set',q:1},
+  /* 1-to-many Installation/Accessories mapping */
+  {id:'P-IA-060',c:['H20..==H2001'],code:'721-01001',n:'LED work light',q:4},
+  {id:'P-IA-061',c:['H20..==H2002'],code:'721-01001',n:'LED work light',q:4},
+  {id:'P-IA-062',c:['H20..==H2002'],code:'721-02001',n:'Rotating beacon, LED',q:2},
+  {id:'P-IA-063',c:['H20..<>H2000'],code:'721-09001',n:'Wiring loom, lighting',q:1},
+  {id:'P-IA-070',c:['H30..==H3001'],code:'725-01001',n:'In-cab charging holder',q:1},
+
+  {id:'P-CT-001',c:['J30..==J3001'],code:'341-01001',n:'HiConnect telematics unit',q:1},
+  {id:'P-CT-002',c:['J30..==J3002'],code:'341-02001',n:'HiConnect Pro telematics unit',q:1},
+  {id:'P-CT-003',c:['J30..==J3002'],code:'341-09001',n:'Antenna kit, roof',q:1}
+];
+
+const MAX_PASSES = 10;
+</script>
+<script>
+/* ==========================================================================
+   RULE ENGINE  —  pure functions over parsed rule rows. No dependencies.
+   Condition grammar:  [LHS]..[Operator][Value]
+     LHS    FamilyID | attribute name | computed field
+     Op     ==   <>   >=   <=   ~=
+     Value  ComponentID (pipe-delimited alternatives) | Blank | number
+            | --ComputedField (cross-field comparison) | attribute name (~=)
+   ========================================================================== */
+
+const COND_RE = /^(.+?)\.\.(==|<>|>=|<=|~=)(.*)$/;
+const parseCache = new Map();
+function parseCond(raw){
+  let p = parseCache.get(raw);
+  if(!p){
+    const m = COND_RE.exec(raw);
+    p = m ? {lhs:m[1],op:m[2],rhs:m[3],raw} : {lhs:raw,op:'==',rhs:'',raw,bad:true};
+    parseCache.set(raw,p);
+  }
+  return p;
+}
+
+/* Resolve the left-hand side. `candidate` is the impact component being
+   tested, which is how an attribute condition on the candidate resolves. */
+function resolveLhs(lhs, ctx, candidate){
+  if(FAMILIES[lhs]){
+    const cid = ctx.selection[lhs];
+    return {kind:'family', family:lhs, cid: cid || null, value: cid || 'Blank',
+            num: cid && COMPONENTS[cid].attrs ? COMPONENTS[cid].attrs.num : undefined,
+            set: cid && COMPONENTS[cid].attrs ? COMPONENTS[cid].attrs : undefined};
+  }
+  if(COMPUTED[lhs]) return {kind:'computed', field:lhs, value:ctx.computed[lhs], num:ctx.computed[lhs]};
+  const ca = candidate && COMPONENTS[candidate] && COMPONENTS[candidate].attrs;
+  if(ca && lhs in ca) return {kind:'attr', attr:lhs, from:candidate, onCandidate:true, value:ca[lhs], num:Number(ca[lhs])};
+  for(const cid of Object.values(ctx.selection)){
+    const a = COMPONENTS[cid] && COMPONENTS[cid].attrs;
+    if(a && lhs in a) return {kind:'attr', attr:lhs, from:cid, value:a[lhs], num:Number(a[lhs])};
+  }
+  return {kind:'unresolved', value:undefined};
+}
+
+function resolveRhsNum(rhs, ctx){
+  if(rhs.startsWith('--')){
+    const f = rhs.slice(2);
+    return {num: ctx.computed[f], field:f};
+  }
+  return {num: Number(rhs)};
+}
+
+function evalCond(raw, ctx, candidate){
+  const p = parseCond(raw);
+  const L = resolveLhs(p.lhs, ctx, candidate);
+  if(p.op==='==' || p.op==='<>'){
+    const alts = p.rhs.split('|');
+    let hit;
+    if(p.rhs==='Blank') hit = (L.value==='Blank' || L.value===undefined || L.value===null);
+    else hit = alts.some(a=>String(L.value)===a);
+    return p.op==='==' ? hit : !hit;
+  }
+  if(p.op==='>=' || p.op==='<='){
+    const R = resolveRhsNum(p.rhs, ctx);
+    if(!Number.isFinite(L.num) || !Number.isFinite(R.num)) return false;
+    return p.op==='>=' ? L.num >= R.num : L.num <= R.num;
+  }
+  if(p.op==='~='){
+    /* shared-attribute matching: candidate's attribute set must intersect
+       the same attribute set on the family's selected component */
+    const key = p.rhs;
+    const mine = candidate && COMPONENTS[candidate].attrs && COMPONENTS[candidate].attrs[key];
+    const theirs = L.set && L.set[key];
+    if(!mine || !theirs) return false;
+    const a = [].concat(mine), b = [].concat(theirs);
+    return a.some(v=>b.includes(v));
+  }
+  return false;
+}
+
+/* ---- Model publication: total → scoped solution space ------------------- */
+function inMarket(cid, market){
+  const m = COMPONENTS[cid].markets;
+  return !m || m.includes(market);
+}
+function publishedComponents(market){
+  return Object.keys(COMPONENTS).filter(cid=>inMarket(cid,market));
+}
+
+/* Indexes, built once. */
+const RULES_BY_TARGET = {};
+function indexRules(rules){
+  const ix = {};
+  for(const r of rules){
+    const k = r.t.k + ':' + r.t.id;
+    (ix[k] = ix[k] || []).push(r);
+  }
+  return ix;
+}
+const COMPONENTS_BY_FAMILY = {};
+for(const [cid,c] of Object.entries(COMPONENTS)){
+  (COMPONENTS_BY_FAMILY[c.f] = COMPONENTS_BY_FAMILY[c.f] || []).push(cid);
+}
+for(const f in COMPONENTS_BY_FAMILY) COMPONENTS_BY_FAMILY[f].sort((a,b)=>COMPONENTS[a].s-COMPONENTS[b].s);
+const FAMILIES_BY_GROUP = {};
+for(const [fid,f] of Object.entries(FAMILIES)){
+  (FAMILIES_BY_GROUP[f.group] = FAMILIES_BY_GROUP[f.group] || []).push(fid);
+}
+for(const g in FAMILIES_BY_GROUP) FAMILIES_BY_GROUP[g].sort((a,b)=>FAMILIES[a].sort-FAMILIES[b].sort);
+
+function defaultOf(family){
+  const list = COMPONENTS_BY_FAMILY[family] || [];
+  const s = list.filter(c=>COMPONENTS[c].so==='S');
+  if(s.length) return s[s.length-1];      /* highest sort index among S rows */
+  return list[list.length-1] || null;
+}
+
+/* ---- The cascade -------------------------------------------------------- */
+function evaluate(market, seedSelection, useCyclic){
+  const t0 = performance.now();
+  const rules = useCyclic ? SALES_RULES.concat(CYCLIC_RULES) : SALES_RULES;
+  const ix = indexRules(rules);
+  const scoped = publishedComponents(market);
+  const scopedSet = new Set(scoped);
+
+  let selection = Object.assign({}, seedSelection);
+  const passes = [];
+  const matchHistory = new Map();
+  rules.forEach(r=>matchHistory.set(r.id, []));
+
+  let prevSig = null, stable = false, ruleEvals = 0;
+  let avail = new Set(), groupOk = {}, familyOk = {}, snapshots = [];
+
+  for(let p=1; p<=MAX_PASSES; p++){
+    const ctx = {selection, computed:computeFields(selection), market};
+    const prevAvail = avail;
+    const fired = [];
+
+    /* 1. group scope */
+    groupOk = {};
+    for(const g in GROUPS){
+      const rows = ix['group:'+g];
+      if(!rows){ groupOk[g] = true; continue; }
+      let ok = false;
+      for(const r of rows){ ruleEvals++; const m = r.c.every(c=>evalCond(c,ctx,null)); if(m){ok=true;fired.push(r);} }
+      groupOk[g] = ok;
+    }
+    /* 2. family scope */
+    familyOk = {};
+    for(const f in FAMILIES){
+      if(!groupOk[FAMILIES[f].group]){ familyOk[f] = false; continue; }
+      const rows = ix['family:'+f];
+      if(!rows){ familyOk[f] = true; continue; }
+      let ok = false;
+      for(const r of rows){ ruleEvals++; const m = r.c.every(c=>evalCond(c,ctx,null)); if(m){ok=true;fired.push(r);} }
+      familyOk[f] = ok;
+    }
+    /* 3. component availability */
+    avail = new Set();
+    for(const cid of scoped){
+      const fam = COMPONENTS[cid].f;
+      if(!familyOk[fam]) continue;
+      const rows = ix['component:'+cid];
+      if(!rows){ avail.add(cid); continue; }
+      let ok = false;
+      for(const r of rows){ ruleEvals++; const m = r.c.every(c=>evalCond(c,ctx,cid)); if(m){ok=true;fired.push(r);} }
+      if(ok) avail.add(cid);
+    }
+    /* record which rules matched this pass, for cycle attribution */
+    const firedIds = new Set(fired.map(r=>r.id));
+    rules.forEach(r=>matchHistory.get(r.id).push(firedIds.has(r.id)));
+
+    /* 4. repair selections */
+    const repairs = [];
+    const next = Object.assign({}, selection);
+    for(const f in FAMILIES){
+      if(!familyOk[f]){ if(next[f]!==undefined){ repairs.push({family:f, from:next[f], to:null, why:'out of scope'}); delete next[f]; } continue; }
+      const cur = next[f];
+      if(cur && avail.has(cur)) continue;
+      const def = defaultOf(f);
+      const pick = (def && avail.has(def)) ? def
+                 : (COMPONENTS_BY_FAMILY[f]||[]).find(c=>avail.has(c)) || null;
+      if(cur !== pick){
+        repairs.push({family:f, from:cur||null, to:pick, why: cur ? 'no longer available' : 'seeded default'});
+        if(pick) next[f] = pick; else delete next[f];
+      }
+    }
+    selection = next;
+
+    const added = [...avail].filter(c=>!prevAvail.has(c));
+    const removed = [...prevAvail].filter(c=>!avail.has(c));
+    passes.push({n:p, fired:[...firedIds], repairs, added, removed, availableCount:avail.size});
+    snapshots.push({avail:new Set(avail), selection:Object.assign({},selection), groupOk:Object.assign({},groupOk), familyOk:Object.assign({},familyOk)});
+
+    const sig = [...avail].sort().join(',') + '||' + Object.keys(selection).sort().map(k=>k+'='+selection[k]).join(',');
+    if(sig === prevSig){ stable = true; break; }
+    prevSig = sig;
+  }
+
+  /* cycle attribution: rules whose match result flipped more than once */
+  let culprits = [];
+  if(!stable){
+    for(const [rid,hist] of matchHistory){
+      let flips = 0;
+      for(let i=1;i<hist.length;i++) if(hist[i]!==hist[i-1]) flips++;
+      if(flips >= 2) culprits.push(rid);
+    }
+  }
+
+  const ms = performance.now() - t0;
+  const computed = computeFields(selection);
+  return {
+    market, selection, avail, groupOk, familyOk, scopedSet,
+    totalComponents:Object.keys(COMPONENTS).length, scopedCount:scoped.length,
+    passes, snapshots, stable, culprits, ruleEvals, ms, computed, rules, ix,
+    ctx:{selection, computed, market}
+  };
+}
+
+function computeFields(sel){
+  const out = {};
+  for(const k in COMPUTED) out[k] = COMPUTED[k].fn(sel);
+  return out;
+}
+
+/* ---- Blocked-option reasoning ------------------------------------------ */
+function blockInfo(cid, ev){
+  const fam = COMPONENTS[cid].f, grp = FAMILIES[fam].group;
+  if(!ev.scopedSet.has(cid)){
+    return {kind:'market', text:'Not published in this market',
+            detail:'The market matrix publishes '+cid+' for '+(COMPONENTS[cid].markets||[]).join(', ')+' only.'};
+  }
+  if(!ev.groupOk[grp]){
+    const rows = ev.ix['group:'+grp] || [];
+    return {kind:'scope', rule:rows[0], conds:condStates(rows[0], ev, null),
+            text:'Family group '+GROUPS[grp].name+' is out of the scoped solution space'};
+  }
+  if(!ev.familyOk[fam]){
+    const rows = ev.ix['family:'+fam] || [];
+    return {kind:'scope', rule:rows[0], conds:condStates(rows[0], ev, null),
+            text:'Family '+FAMILIES[fam].name+' is out of the scoped solution space'};
+  }
+  const rows = ev.ix['component:'+cid] || [];
+  let best = null;
+  for(const r of rows){
+    const cs = condStates(r, ev, cid);
+    const unmet = cs.filter(c=>!c.met).length;
+    if(!best || unmet < best.unmet) best = {rule:r, conds:cs, unmet, total:cs.length};
+  }
+  if(!best) return {kind:'unknown', text:'No governing rule found'};
+  return Object.assign({kind:'rule'}, best);
+}
+
+function condStates(rule, ev, candidate){
+  if(!rule) return [];
+  return rule.c.map(raw=>{
+    const met = evalCond(raw, ev.ctx, candidate);
+    return Object.assign({raw, met}, describeCond(raw, ev, candidate));
+  });
+}
+
+/* Plain-language rendering of a condition, plus a machine-applicable fix. */
+function describeCond(raw, ev, candidate){
+  const p = parseCond(raw);
+  const fam = FAMILIES[p.lhs];
+  const cur = fam ? ev.selection[p.lhs] : null;
+  const curName = cur ? COMPONENTS[cur].n : 'nothing selected';
+
+  if(fam && (p.op==='=='||p.op==='<>')){
+    const alts = p.rhs.split('|');
+    if(p.rhs==='Blank'){
+      return {text:'<b>'+fam.name+'</b> must have '+(p.op==='=='?'no selection':'a selection'),
+              now:curName, fix:null};
+    }
+    const names = alts.filter(a=>COMPONENTS[a]).map(a=>COMPONENTS[a].n);
+    if(p.op==='=='){
+      const target = alts.find(a=>ev.avail.has(a)) || alts[0];
+      return {text:'<b>'+fam.name+'</b> must be '+names.join(' or '),
+              now:curName,
+              fix:{family:p.lhs, to:target, blockedTarget:!ev.avail.has(target)}};
+    }
+    const alt = (COMPONENTS_BY_FAMILY[p.lhs]||[]).find(c=>!alts.includes(c) && ev.avail.has(c));
+    return {text:'<b>'+fam.name+'</b> must not be '+names.join(' or '),
+            now:curName, fix: alt ? {family:p.lhs, to:alt} : null};
+  }
+  if(fam && (p.op==='>='||p.op==='<=')){
+    const R = resolveRhsNum(p.rhs, ev.ctx);
+    const nowNum = cur && COMPONENTS[cur].attrs ? COMPONENTS[cur].attrs.num : undefined;
+    const target = (COMPONENTS_BY_FAMILY[p.lhs]||[]).find(c=>{
+      const n = COMPONENTS[c].attrs && COMPONENTS[c].attrs.num;
+      return ev.avail.has(c) && Number.isFinite(n) && (p.op==='>=' ? n>=R.num : n<=R.num);
+    });
+    return {text:'<b>'+fam.name+'</b> must be '+(p.op==='>='?'at least':'at most')+' '+fmtNum(R.num),
+            now:curName+(Number.isFinite(nowNum)?' ('+fmtNum(nowNum)+')':''),
+            fix: target ? {family:p.lhs, to:target} : null};
+  }
+  if(COMPUTED[p.lhs]){
+    const C = COMPUTED[p.lhs], R = resolveRhsNum(p.rhs, ev.ctx);
+    return {text:'<b>'+C.label+'</b> must be '+(p.op==='>='?'at least':'at most')+' '+fmtNum(R.num)+' '+C.unit,
+            now:fmtNum(ev.computed[p.lhs])+' '+C.unit, fix:null,
+            note:'Computed field · '+C.formula};
+  }
+  if(p.op==='~='){
+    const other = FAMILIES[p.lhs];
+    const mine = candidate && COMPONENTS[candidate].attrs && COMPONENTS[candidate].attrs[p.rhs];
+    const theirs = cur && COMPONENTS[cur].attrs && COMPONENTS[cur].attrs[p.rhs];
+    return {text:'Must share a <b>'+p.rhs.toLowerCase()+'</b> class with the selected '+(other?other.name.toLowerCase():p.lhs),
+            now:(theirs?[].concat(theirs).join(', '):'—')+' on '+curName+
+                ' vs '+(mine?[].concat(mine).join(', '):'—')+' on this option',
+            fix:null, note:'Shared-attribute matching'};
+  }
+  /* attribute condition */
+  const R = (p.op==='>='||p.op==='<=') ? resolveRhsNum(p.rhs, ev.ctx) : null;
+  const L = resolveLhs(p.lhs, ev.ctx, candidate);
+  const rhsLabel = R
+    ? (R.field ? COMPUTED[R.field].label.toLowerCase()+' ('+fmtNum(R.num)+' '+COMPUTED[R.field].unit+')' : fmtNum(R.num))
+    : p.rhs;
+  return {text:'<b>'+p.lhs+'</b> must be '+(p.op==='>='?'at least ':p.op==='<='?'at most ':p.op==='<>'?'other than ':'')+rhsLabel,
+          now: L.value===undefined ? 'unresolved' : String(L.value)+(L.onCandidate?' (this option)':L.from?' (from '+L.from+')':''),
+          fix:null, note: L.onCandidate ? 'Attribute of the candidate option' : 'Attribute of a selected option'};
+}
+
+function fmtNum(n){
+  if(!Number.isFinite(n)) return '—';
+  return (Math.round(n*10)/10).toLocaleString('en-GB');
+}
+
+/* ---- MBOM: single pass over production rules --------------------------- */
+function buildMbom(ev){
+  const ctx = ev.ctx;
+  const byCode = new Map();
+  let evals = 0;
+  for(const r of PROD_RULES){
+    evals++;
+    if(!r.c.every(c=>evalCond(c, ctx, null))) continue;
+    let row = byCode.get(r.code);
+    if(!row){ row = {code:r.code, n:r.n, q:0, from:[]}; byCode.set(r.code, row); }
+    row.q += r.q;
+    row.from.push(r.id+' ×'+r.q);
+  }
+  const rows = [...byCode.values()].sort((a,b)=>a.code.localeCompare(b.code));
+  const items = rows.reduce((s,r)=>s+r.q,0);
+  return {rows, items, evals};
+}
+
+/* ---- SBOM ------------------------------------------------------------- */
+function buildSbom(ev){
+  const out = [];
+  for(const st of STRUCTURES){
+    const lines = [];
+    for(const g of st.groups){
+      if(!ev.groupOk[g]) continue;
+      for(const f of FAMILIES_BY_GROUP[g]||[]){
+        if(!ev.familyOk[f]) continue;
+        const cid = ev.selection[f];
+        if(!cid) continue;
+        lines.push({family:f, familyName:FAMILIES[f].name, cid, name:COMPONENTS[cid].n});
+      }
+    }
+    out.push({structure:st, lines});
+  }
+  return out;
+}
+</script>
+<script>
+/* ==========================================================================
+   APPLICATION STATE + RENDERING
+   ========================================================================== */
+const LSKEY = 'hiab-cfg-2-demo';
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const state = {
+  configId: null,
+  market: 'EU',
+  selection: {},
+  structure: 'LC',
+  group: 'FG1',
+  itab: 'solution',
+  policy: 'disable',          /* hide | disable | explain */
+  probe: null,                /* ComponentID whose block reason is open */
+  cyclic: false,
+  stepMode: false,
+  stepPass: 1,
+  openDd: null,
+  ruleFilter: '',
+  savedAt: null
+};
+let ev = null, mbom = null, sbom = null;
+
+function newId(){
+  try{ return crypto.randomUUID(); }
+  catch(e){ return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
+    const r=Math.random()*16|0; return (c==='x'?r:(r&0x3|0x8)).toString(16); }); }
+}
+
+function load(){
+  try{
+    const raw = localStorage.getItem(LSKEY);
+    if(raw){
+      const d = JSON.parse(raw);
+      if(d && d.ConfigurationID){
+        state.configId = d.ConfigurationID;
+        state.market = MARKETS.some(m=>m.id===d.MarketID) ? d.MarketID : 'EU';
+        state.selection = d.Selection || {};
+        if(d.Policy) state.policy = d.Policy;
+        return;
+      }
+    }
+  }catch(e){/* private mode, blocked storage — start fresh */}
+  state.configId = newId();
+}
+function save(){
+  state.savedAt = new Date();
+  try{
+    localStorage.setItem(LSKEY, JSON.stringify(jsonbDoc()));
+  }catch(e){/* non-fatal */}
+}
+function jsonbDoc(){
+  return {
+    ConfigurationID: state.configId,
+    ModelID: MODEL,
+    MarketID: state.market,
+    Policy: state.policy,
+    Selection: ev ? ev.selection : state.selection,
+    Sbom: sbom ? sbom.flatMap(s=>s.lines.map(l=>l.cid)) : [],
+    Mbom: mbom ? mbom.rows.map(r=>({MaterialID:r.code, Qty:r.q})) : [],
+    UpdatedAt: new Date().toISOString()
+  };
+}
+
+/* ---- run the engine ---------------------------------------------------- */
+function run(opts){
+  opts = opts || {};
+  const before = ev ? Object.assign({}, ev.selection) : null;
+  ev = evaluate(state.market, state.selection, state.cyclic);
+  state.selection = Object.assign({}, ev.selection);
+  mbom = buildMbom(ev);
+  sbom = buildSbom(ev);
+  if(!state.stepMode) state.stepPass = ev.passes.length;
+  save();
+
+  if(before && opts.announceRepairs){
+    const reps = [];
+    for(const f in FAMILIES){
+      const a = before[f], b = ev.selection[f];
+      if(a && a!==b && f!==opts.changedFamily){
+        reps.push({f, from:a, to:b});
+      }
+    }
+    reps.slice(0,3).forEach(r=>{
+      toast(FAMILIES[r.f].name + (r.to ? ' reset' : ' cleared'),
+        r.to ? '<code>'+esc(COMPONENTS[r.from].n)+'</code> is no longer available. Set to <code>'+esc(COMPONENTS[r.to].n)+'</code>.'
+             : '<code>'+esc(COMPONENTS[r.from].n)+'</code> dropped — the family left the scoped solution space.',
+        'warn');
+    });
+    if(reps.length>3) toast('Cascade repaired '+reps.length+' selections','Open the Trace tab to step through the passes.','warn');
+  }
+  if(!ev.stable && opts.announceRepairs){
+    toast('Cascade did not stabilise', 'Stopped after '+MAX_PASSES+' passes. Suspect rules: <code>'+ev.culprits.join(', ')+'</code>.', 'warn');
+  }
+  render();
+}
+
+let toastSeq = 0;
+function toast(title, body, kind){
+  const el = document.createElement('div');
+  el.className = 'toast' + (kind==='warn' ? ' warn' : '');
+  el.innerHTML = '<div class="tt">'+esc(title)+'</div><div class="tb">'+body+'</div>';
+  $('toasts').appendChild(el);
+  const id = ++toastSeq;
+  setTimeout(()=>{ if(el.parentNode) el.remove(); }, 7000 + id*0);
+}
+
+/* view = the pass snapshot currently displayed (step mode) */
+function view(){
+  if(state.stepMode){
+    const i = Math.min(state.stepPass, ev.snapshots.length) - 1;
+    const s = ev.snapshots[Math.max(0,i)];
+    return {avail:s.avail, selection:s.selection, groupOk:s.groupOk, familyOk:s.familyOk, live:false};
+  }
+  return {avail:ev.avail, selection:ev.selection, groupOk:ev.groupOk, familyOk:ev.familyOk, live:true};
+}
+
+/* ==========================  TELEMETRY  ================================= */
+function renderTelemetry(){
+  const passes = ev.passes.length;
+  const inScope = [...ev.scopedSet].filter(c=>ev.familyOk[COMPONENTS[c].f]).length;
+  const blocked = inScope - [...ev.avail].length;
+  const cells = [
+    ['Passes', passes + (ev.stable?'':'<small> / cap</small>')],
+    ['Rule evaluations', ev.ruleEvals.toLocaleString('en-GB')],
+    ['Evaluation', ev.ms.toFixed(1)+'<small> ms</small>'],
+    ['Solution space', ev.scopedCount+'<small> / '+ev.totalComponents+'</small>'],
+    ['Available', ev.avail.size],
+    ['Blocked', blocked],
+    ['MBOM lines', mbom.rows.length+'<small> · '+mbom.items+' items</small>']
+  ];
+  $('telemetry').innerHTML =
+    cells.map(([k,v])=>'<div class="tcell"><span class="t-k">'+k+'</span><span class="t-v">'+v+'</span></div>').join('') +
+    '<div class="tcell state">' + (ev.stable
+      ? '<span class="statechip ok"><span class="dot"></span>Stabilised in '+passes+' pass'+(passes>1?'es':'')+'</span>'
+      : '<span class="statechip cyc"><span class="dot"></span>Not stabilised — probable rule cycle</span>') +
+    '</div>';
+  $('telemetry').classList.remove('flash');
+  void $('telemetry').offsetWidth;
+  $('telemetry').classList.add('flash');
+}
+
+/* ==========================  LEFT RAIL  ================================= */
+function renderRail(){
+  const v = view();
+  $('steps').innerHTML = STRUCTURES.map((st,i)=>{
+    const groups = st.groups.filter(g=>v.groupOk[g]);
+    const fields = groups.flatMap(g=>(FAMILIES_BY_GROUP[g]||[]).filter(f=>v.familyOk[f]));
+    const blocked = groups.flatMap(g=>(FAMILIES_BY_GROUP[g]||[]).filter(f=>v.familyOk[f]))
+      .flatMap(f=>(COMPONENTS_BY_FAMILY[f]||[]).filter(c=>ev.scopedSet.has(c) && !v.avail.has(c))).length;
+    const oosCount = st.groups.length - groups.length;
+    return '<button class="step'+(state.structure===st.id?' on':'')+(groups.length?'':' oos')+'" data-struct="'+st.id+'">'+
+      '<span class="num">'+String(i+1).padStart(2,'0')+'</span>'+
+      '<span><span class="nm">'+esc(st.name)+'</span>'+
+      '<span class="sub">'+fields.length+' fields · <b>'+blocked+'</b> blocked'+
+      (oosCount?' · '+oosCount+' group'+(oosCount>1?'s':'')+' out of scope':'')+'</span></span></button>';
+  }).join('');
+
+  const pol = [
+    ['hide','Hide','Removed from the field — parity with today’s configurator.'],
+    ['disable','Disable','Visible, hatched, not selectable. Unblock hint on click.'],
+    ['explain','Explain','Selectable. Selecting surfaces the unmet conditions.']
+  ];
+  $('railctl').innerHTML =
+    '<div class="railsec"><span class="eyebrow">Blocked options</span><div class="radios">'+
+      pol.map(([k,l,d])=>'<button class="radio'+(state.policy===k?' on':'')+'" data-policy="'+k+'">'+
+        '<span class="box"></span><span><span class="lbl">'+l+'</span><span class="d">'+esc(d)+'</span></span></button>').join('')+
+    '</div></div>'+
+    '<div class="railsec"><span class="eyebrow">Rule interpreter</span>'+
+      '<div class="notecard" style="margin-bottom:8px">'+
+        (state.stepMode
+          ? 'Paused at pass <b>'+state.stepPass+' of '+ev.passes.length+'</b>. The configurator shows the solution space as it stood after that pass.'
+          : 'Runs to stabilisation automatically. Step mode pauses the cascade so you can watch it settle.')+
+      '</div>'+
+      '<div class="railrow">'+
+        (state.stepMode
+          ? '<button class="btn sm" id="btn-prev"'+(state.stepPass<=1?' disabled':'')+'>◀ Prev</button>'+
+            '<button class="btn sm" id="btn-next"'+(state.stepPass>=ev.passes.length?' disabled':'')+'>Next ▶</button>'+
+            '<button class="btn sm primary" id="btn-resume">Resume</button>'
+          : '<button class="btn sm" id="btn-step">Step through passes</button>')+
+      '</div>'+
+    '</div>'+
+    '<div class="railsec"><span class="eyebrow">Rule lab</span>'+
+      '<button class="radio'+(state.cyclic?' on':'')+'" data-cyclic="1" style="padding-left:0">'+
+        '<span class="box"></span><span><span class="lbl">Inject cyclic rule pair</span>'+
+        '<span class="d">Adds <code class="mono">R-LAB-901…905</code>, which make corrosion class and stabiliser legs each require the other family’s alternative. The cascade walks a four-state loop and never stabilises. Market EU.</span></span></button>'+
+    '</div>';
+
+  const nFam = Object.keys(FAMILIES).length, nComp = Object.keys(COMPONENTS).length;
+  $('railabout').innerHTML =
+    '<div class="railsec"><span class="eyebrow">About this demo</span>'+
+      '<div class="notecard">Synthetic master data shaped like Hiab’s PFMP export: <b>'+STRUCTURES.length+'</b> structures, '+
+      '<b>'+Object.keys(GROUPS).length+'</b> family groups, <b>'+nFam+'</b> families, <b>'+nComp+'</b> sales options, '+
+      '<b>'+SALES_RULES.length+'</b> sales rules, <b>'+PROD_RULES.length+'</b> production rules. '+
+      'No Hiab data was used.</div>'+
+      '<details class="help"><summary>How to read this</summary><div class="body">'+
+        '<span>The whole UI is generated from the data: <b>FamilyGroupID</b> → tabs, <b>FamilyID</b> → fields, '+
+        '<b>ComponentID</b> → options, <b>UICode</b> → selector type. No per-model UI code.</span>'+
+        '<span>Hatched options are <b>blocked</b> by a sales rule. Click one to see which conditions are unmet, and apply the fix.</span>'+
+        '<span>Selections that a rule invalidates are repaired automatically — that is what drives the multi-pass cascade.</span>'+
+        '<span>Try: set <b>Capacity class</b> to X-HiPro 302, then <b>Control system</b> to SPACE 5000, and watch the '+
+        'Installation and Contracts structures open up. Or set <b>Installation scope</b> to "Chassis only" to take two whole family groups out of scope.</span>'+
+      '</div></details>'+
+    '</div>';
+}
+</script>
+<script>
+/* ==========================  CENTRE COLUMN  ============================= */
+function renderMain(){
+  const v = view();
+  const st = STRUCTURES.find(s=>s.id===state.structure);
+  const groups = st.groups.filter(g=>v.groupOk[g]);
+  const oos = st.groups.filter(g=>!v.groupOk[g]);
+  if(!groups.includes(state.group)) state.group = groups[0] || null;
+
+  let html = '';
+
+  html += '<div class="structhead"><div>'+
+    '<span class="eyebrow">Structure '+(STRUCTURES.indexOf(st)+1)+' of '+STRUCTURES.length+'</span>'+
+    '<h2>'+esc(st.name)+'</h2>'+
+    '<div class="sh-sub">Model <code>'+MODEL+'</code> · market <code>'+state.market+'</code> · '+
+      'upstream selections from earlier structures are evaluated as ordinary conditions</div>'+
+    '</div></div>';
+
+  if(state.stepMode){
+    const p = ev.passes[state.stepPass-1];
+    html += '<div class="stepbanner">'+
+      '<span class="sb-t">Pass '+state.stepPass+' / '+ev.passes.length+'</span>'+
+      '<span class="sb-d">'+p.fired.length+' rules fired · '+p.added.length+' options became available · '+
+        p.removed.length+' withdrawn · '+p.repairs.length+' selections repaired. Read-only while paused.</span>'+
+      '<span class="sb-a"><button class="btn sm" id="btn-prev2"'+(state.stepPass<=1?' disabled':'')+'>◀</button>'+
+      '<button class="btn sm" id="btn-next2"'+(state.stepPass>=ev.passes.length?' disabled':'')+'>▶</button>'+
+      '<button class="btn sm primary" id="btn-resume2">Resume</button></span></div>';
+  }
+
+  if(!ev.stable){
+    html += '<div class="scopenote" style="background:var(--warn-soft);border-color:var(--warn-line)">'+
+      '<span class="ic" style="color:var(--warn)">!</span><span>The cascade did not stabilise within '+MAX_PASSES+
+      ' passes, so the rule structure probably contains a cycle. Rules whose outcome kept flipping: <b>'+
+      esc(ev.culprits.join(', '))+'</b>. Open the <b>Trace</b> tab to see the oscillation pass by pass.</span></div>';
+  }
+
+  if(oos.length){
+    const cause = oos.map(g=>{
+      const rows = ev.ix['group:'+g] || [];
+      const cs = condStates(rows[0], ev, null).filter(c=>!c.met);
+      return cs.length ? cs[0].text.replace(/<\/?b>/g,'') : 'a scoping rule';
+    })[0];
+    html += '<div class="scopenote"><span class="ic">scope</span><span>'+
+      '<b>'+oos.map(g=>GROUPS[g].name).join('</b> and <b>')+'</b> '+(oos.length>1?'are':'is')+
+      ' out of the scoped solution space. Family-group-level rule requires: '+esc(cause)+'.</span></div>';
+  }
+
+  if(groups.length){
+    html += '<div class="tabs">'+groups.map(g=>{
+      const fams = (FAMILIES_BY_GROUP[g]||[]).filter(f=>v.familyOk[f]);
+      const blk = fams.flatMap(f=>(COMPONENTS_BY_FAMILY[f]||[]).filter(c=>ev.scopedSet.has(c)&&!v.avail.has(c))).length;
+      return '<button class="tab'+(state.group===g?' on':'')+'" data-group="'+g+'">'+esc(GROUPS[g].name)+
+        '<span class="cnt">'+fams.length+'</span>'+(blk?'<span class="warnpip" title="'+blk+' blocked options"></span>':'')+'</button>';
+    }).join('')+'</div>';
+
+    html += '<div>'+(FAMILIES_BY_GROUP[state.group]||[])
+      .filter(f=>v.familyOk[f]).map(f=>renderField(f, v)).join('')+'</div>';
+
+    const hiddenFams = (FAMILIES_BY_GROUP[state.group]||[]).filter(f=>!v.familyOk[f]);
+    if(hiddenFams.length){
+      html += '<div class="scopenote" style="margin-top:10px"><span class="ic">scope</span><span>'+
+        '<b>'+hiddenFams.map(f=>FAMILIES[f].name).join('</b>, <b>')+'</b> '+(hiddenFams.length>1?'are':'is')+
+        ' out of scope here — a family-level rule withdrew '+(hiddenFams.length>1?'them':'it')+
+        ' from the solution space.</span></div>';
+    }
+  }
+  $('main').innerHTML = html;
+}
+
+function renderField(f, v){
+  const fam = FAMILIES[f];
+  const opts = (COMPONENTS_BY_FAMILY[f]||[]).filter(c=>ev.scopedSet.has(c));
+  const sel = v.selection[f];
+  const govCount = SALES_RULES.concat(state.cyclic?CYCLIC_RULES:[])
+    .filter(r=>r.t.k==='component' && opts.includes(r.t.id)).length;
+
+  let h = '<div class="field" data-field="'+f+'">'+
+    '<div class="field-h">'+
+      '<span class="fname">'+esc(fam.name)+'</span>'+
+      '<span class="fid mono">'+f+'</span>'+
+      (govCount?'<span class="fgov">'+govCount+' rule'+(govCount>1?'s':'')+'</span>':'')+
+      '<span class="fsel">'+(sel?'<b>'+esc(COMPONENTS[sel].n)+'</b> <span class="mono" style="font-size:10.5px;color:var(--ink-3)">'+sel+'</span>':'<i>no selection</i>')+'</span>'+
+    '</div><div class="field-b">';
+
+  const shown = opts.filter(c=>state.policy!=='hide' || v.avail.has(c));
+  if(!shown.length){
+    h += '<div class="notecard">No option in this family is available with the current configuration.</div>';
+  } else if(fam.ui==='segment'){
+    h += '<div class="seg">'+shown.map(c=>{
+      const blk = !v.avail.has(c);
+      return '<button class="segb'+(sel===c?' sel':'')+(blk?' blk':'')+(state.probe===c?' probe':'')+
+        '" data-opt="'+c+'" data-fam="'+f+'">'+esc(COMPONENTS[c].n)+'<span class="sid">'+c+'</span></button>';
+    }).join('')+'</div>';
+  } else if(fam.ui==='dropdown'){
+    const open = state.openDd===f;
+    h += '<div class="dd">'+
+      '<button class="ddbtn'+(open?' open':'')+'" data-dd="'+f+'">'+
+        '<span class="dlab">'+(sel?esc(COMPONENTS[sel].n):'Select…')+'</span>'+
+        '<span class="did">'+(sel||'')+'</span><span class="car">'+(open?'▲':'▼')+'</span></button>'+
+      (open ? '<div class="ddpop">'+shown.map(c=>{
+        const blk = !v.avail.has(c);
+        return '<button class="ddi'+(sel===c?' sel':'')+(blk?' blk':'')+'" data-opt="'+c+'" data-fam="'+f+'">'+
+          '<span class="dnm">'+esc(COMPONENTS[c].n)+'</span>'+
+          (COMPONENTS[c].so==='S'?'<span class="chip s">Default</span>':'')+
+          (blk?'<span class="chip blkc">Blocked</span>':'')+
+          '<span class="dcid">'+c+'</span></button>';
+      }).join('')+'</div>' : '')+
+    '</div>';
+  } else {
+    const isSpec = fam.ui==='spec';
+    h += '<div class="cards'+(isSpec?' spec':'')+'">'+shown.map(c=>{
+      const C = COMPONENTS[c], blk = !v.avail.has(c);
+      return '<button class="opt'+(sel===c?' sel':'')+(blk?' blk':'')+(state.probe===c?' probe':'')+
+        '" data-opt="'+c+'" data-fam="'+f+'">'+
+        '<span class="on-name">'+esc(C.n)+'</span>'+
+        '<span class="on-id">'+c+'</span>'+
+        '<span class="flags">'+(C.so==='S'?'<span class="chip s">Default</span>':'<span class="chip">Published</span>')+
+          (blk?'<span class="chip blkc">Blocked</span>':'')+'</span>'+
+        (isSpec && C.spec ? '<span class="spectab">'+Object.entries(C.spec).map(([k,val])=>
+            '<span class="sk">'+esc(k)+'</span><span class="sv">'+esc(val)+'</span>').join('')+'</span>' : '')+
+      '</button>';
+    }).join('')+'</div>';
+  }
+  h += '</div>';
+
+  if(state.probe && COMPONENTS[state.probe] && COMPONENTS[state.probe].f===f){
+    h += renderExplain(state.probe);
+  }
+  h += '</div>';
+  return h;
+}
+
+function renderExplain(cid){
+  const info = blockInfo(cid, ev);
+  const C = COMPONENTS[cid];
+  let h = '<div class="explain">'+
+    '<div class="explain-h">'+
+      '<span class="ex-t">'+esc(C.n)+' is blocked</span>'+
+      (info.rule?'<span class="ex-r">'+info.rule.id+' · '+
+        (info.total!=null?(info.total-info.unmet)+' of '+info.total+' conditions met':'scoping rule')+'</span>':'')+
+      '<button class="ex-x" data-close-probe="1" title="Close">✕</button>'+
+    '</div>';
+
+  if(info.kind==='market'){
+    h += '<div class="conds"><div class="cond unmet"><span class="cmark">✕</span><span class="ctext">'+
+      esc(info.text)+'<span class="craw">'+esc(info.detail)+'</span></span></div></div>';
+  } else {
+    if(info.kind==='scope'){
+      h += '<div class="conds"><div class="cond unmet"><span class="cmark">✕</span><span class="ctext">'+
+        esc(info.text)+'</span></div></div>';
+    }
+    h += '<div class="conds">'+info.conds.map(c=>
+      '<div class="cond '+(c.met?'met':'unmet')+'">'+
+        '<span class="cmark">'+(c.met?'✓':'✕')+'</span>'+
+        '<span class="ctext">'+c.text+
+          '<span class="craw">'+esc(c.raw)+'  ·  now: '+esc(c.now||'—')+'</span>'+
+          (c.note?'<span class="craw">'+esc(c.note)+'</span>':'')+
+          (c.fix && c.fix.blockedTarget?'<span class="cwarn">The required option '+
+            esc(COMPONENTS[c.fix.to].n)+' is itself blocked — applying the fix will step towards it.</span>':'')+
+        '</span></div>').join('')+'</div>';
+
+    const fixable = info.conds.filter(c=>!c.met && c.fix);
+    const unfixable = info.conds.filter(c=>!c.met && !c.fix);
+    h += '<div class="explain-f">';
+    if(fixable.length){
+      h += '<button class="btn sm primary" data-fix="'+cid+'">Apply '+fixable.length+' change'+
+        (fixable.length>1?'s':'')+'</button>';
+    }
+    h += '<span class="fnote">'+
+      (fixable.length
+        ? 'Sets '+fixable.map(c=>esc(FAMILIES[c.fix.family].name)+' → '+esc(COMPONENTS[c.fix.to].n)).join(', ')+', then re-evaluates.'
+        : '')+
+      (unfixable.length
+        ? (fixable.length?' ':'')+'Remaining condition'+(unfixable.length>1?'s':'')+
+          ' cannot be auto-resolved — adjust the configuration by hand.'
+        : '')+
+      '</span></div>';
+  }
+  return h + '</div>';
+}
+</script>
+<script>
+/* ==========================  INSPECTOR  ================================= */
+const ITABS = [
+  {id:'solution', label:'Solution'},
+  {id:'mbom',     label:'MBOM'},
+  {id:'trace',    label:'Trace'},
+  {id:'rules',    label:'Rules'}
+];
+
+function renderInspector(){
+  const counts = {solution:sbom.reduce((s,x)=>s+x.lines.length,0), mbom:mbom.rows.length,
+                  trace:ev.passes.length, rules:SALES_RULES.length+(state.cyclic?CYCLIC_RULES.length:0)};
+  let h = '<div class="itabs">'+ITABS.map(t=>
+    '<button class="itab'+(state.itab===t.id?' on':'')+'" data-itab="'+t.id+'">'+t.label+
+    '<span class="n">'+counts[t.id]+'</span></button>').join('')+'</div>';
+  h += '<div class="ibody">'+({solution:iSolution, mbom:iMbom, trace:iTrace, rules:iRules}[state.itab])()+'</div>';
+  $('inspector').innerHTML = h;
+}
+
+function iSolution(){
+  let h = '';
+  h += '<div class="isec"><span class="eyebrow">Derived specification</span><div class="deflist">'+
+    Object.entries(COMPUTED).map(([k,C])=>
+      '<span class="dt">'+esc(C.label)+'</span><span class="dd">'+fmtNum(ev.computed[k])+' '+C.unit+'</span>').join('')+
+    '</div><div class="notecard" style="margin-top:7px;color:var(--ink-3)">Computed configurator fields. '+
+    'Rules reference them as <code class="mono">--CraneMinFlow</code>.</div></div>';
+
+  for(const s of sbom){
+    if(!s.lines.length) continue;
+    h += '<div class="isec"><span class="eyebrow">'+esc(s.structure.name)+' · SBOM</span><div class="deflist">'+
+      s.lines.map(l=>'<span class="dt">'+esc(l.familyName)+'</span>'+
+        '<span class="dd" title="'+esc(l.name)+'">'+l.cid+'</span>').join('')+'</div>'+
+      '<div class="notecard" style="margin-top:6px;color:var(--ink-3)">'+
+        s.lines.map(l=>esc(l.name)).join(' · ')+'</div></div>';
+  }
+
+  const doc = jsonbDoc();
+  const pretty = JSON.stringify(doc, null, 2)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/"([^"]+)":/g,'"<span class="jk">$1</span>":')
+    .replace(/: "([^"]*)"/g,': "<span class="jv">$1</span>"');
+  h += '<div class="isec"><span class="eyebrow">Persisted document</span>'+
+    '<div class="notecard" style="margin-bottom:7px">One <code class="mono">JSONB</code> document keyed by UUID, '+
+    'auto-saved on every change. Reload the page to restore it.</div>'+
+    '<pre class="json">'+pretty+'</pre></div>';
+  return h;
+}
+
+function iMbom(){
+  const acc = mbom.rows.filter(r=>r.from.length>1);
+  let h = '<div class="isec"><span class="eyebrow">Manufacturing rule engine</span>'+
+    '<div class="notecard">Single pass over <b>'+PROD_RULES.length+'</b> production rules against the stable SBOM — '+
+    'no iteration, because rules only ever run SBOM → MBOM. '+
+    '<b>'+mbom.rows.length+'</b> material lines, <b>'+mbom.items+'</b> items'+
+    (acc.length?', <b>'+acc.length+'</b> with quantities accumulated from more than one rule':'')+'.</div></div>';
+
+  h += '<div class="isec"><div class="tblwrap"><table class="tbl"><thead><tr>'+
+    '<th>Material</th><th>Description</th><th class="num">Qty</th></tr></thead><tbody>'+
+    mbom.rows.map(r=>'<tr><td class="code">'+r.code+'</td>'+
+      '<td>'+esc(r.n)+'<span class="src">'+esc(r.from.join('  +  '))+'</span></td>'+
+      '<td class="num'+(r.from.length>1?' sum':'')+'">'+r.q+'</td></tr>').join('')+
+    '</tbody></table></div></div>';
+  return h;
+}
+
+function iTrace(){
+  let h = '<div class="isec"><span class="eyebrow">Sales rule cascade</span><div class="notecard">'+
+    (ev.stable
+      ? 'Stabilised after <b>'+ev.passes.length+'</b> pass'+(ev.passes.length>1?'es':'')+
+        ' — the available set and the selections stopped changing. Rule evaluations: <b>'+ev.ruleEvals.toLocaleString('en-GB')+
+        '</b> in <b>'+ev.ms.toFixed(1)+' ms</b>.'
+      : 'Stopped at the <b>'+MAX_PASSES+'</b>-pass cap without stabilising. Rules whose outcome flipped repeatedly are '+
+        'flagged below — that is the cycle.')+
+    '</div></div>';
+
+  h += '<div class="isec">'+ev.passes.map((p,i)=>{
+    const isCur = state.stepMode && state.stepPass===i+1;
+    const osc = !ev.stable && i>=2;
+    return '<details class="pass'+(isCur?' cur':'')+(osc?' osc':'')+'"'+(isCur||i===ev.passes.length-1?' open':'')+'>'+
+      '<summary><span class="pn">Pass '+p.n+'</span>'+
+        '<span class="pchips">'+
+          '<span class="pchip">'+p.fired.length+' fired</span>'+
+          (p.added.length?'<span class="pchip add">+'+p.added.length+'</span>':'')+
+          (p.removed.length?'<span class="pchip rem">−'+p.removed.length+'</span>':'')+
+          (p.repairs.length?'<span class="pchip rep">'+p.repairs.length+' repaired</span>':'')+
+          '<span class="pchip">'+p.availableCount+' avail</span>'+
+        '</span></summary>'+
+      '<div class="passbody">'+
+        (p.added.length?'<div class="plabel">Became available</div>'+
+          p.added.slice(0,14).map(c=>'<div class="dline a"><span class="dm">+</span><span>'+esc(COMPONENTS[c].n)+
+            ' <span class="rid">'+c+'</span></span></div>').join('')+
+          (p.added.length>14?'<div class="dline a"><span class="dm">+</span><span>… and '+(p.added.length-14)+' more</span></div>':''):'')+
+        (p.removed.length?'<div class="plabel">Withdrawn</div>'+
+          p.removed.slice(0,10).map(c=>'<div class="dline r"><span class="dm">−</span><span>'+esc(COMPONENTS[c].n)+
+            ' <span class="rid">'+c+'</span></span></div>').join(''):'')+
+        (p.repairs.length?'<div class="plabel">Selections repaired</div>'+
+          p.repairs.map(r=>'<div class="dline p"><span class="dm">→</span><span>'+
+            esc(FAMILIES[r.family].name)+': '+(r.from?esc(COMPONENTS[r.from].n):'—')+' → '+
+            (r.to?esc(COMPONENTS[r.to].n):'cleared')+' <span class="rid">'+esc(r.why)+'</span></span></div>').join(''):'')+
+        '<div class="plabel">Rules that fired</div><div class="firedlist">'+
+          p.fired.map(id=>'<span class="fr'+(ev.culprits.includes(id)?' cyc':'')+'">'+id+'</span>').join('')+
+        '</div>'+
+      '</div></details>';
+  }).join('')+'</div>';
+  return h;
+}
+
+function iRules(){
+  const all = SALES_RULES.concat(state.cyclic?CYCLIC_RULES:[]);
+  const q = state.ruleFilter.trim().toLowerCase();
+  const list = all.filter(r=> !q ||
+    r.id.toLowerCase().includes(q) || r.t.id.toLowerCase().includes(q) ||
+    r.c.join(' ').toLowerCase().includes(q) ||
+    (COMPONENTS[r.t.id] && COMPONENTS[r.t.id].n.toLowerCase().includes(q)));
+
+  let h = '<div class="isec"><span class="eyebrow">Condition grammar</span><div class="grammar">'+
+    '<code>F..==C1|C2</code><span class="g-d">Family F selects C1 or C2. Pipes are OR within a column; columns are AND.</span>'+
+    '<code>F..&lt;&gt;C1</code><span class="g-d">Family F is anything but C1.</span>'+
+    '<code>F..&gt;=4500</code><span class="g-d">Comparison on the selected option’s numeric attribute.</span>'+
+    '<code>F..==Blank</code><span class="g-d">Family F has no current selection.</span>'+
+    '<code>F..~=Fit</code><span class="g-d">Shared-attribute matching against the selection in F.</span>'+
+    '<code>Attr..==V</code><span class="g-d">Attribute condition, resolved on the candidate or a selected option.</span>'+
+    '<code>A..&gt;=--B</code><span class="g-d">Cross-field comparison against a computed configurator field.</span>'+
+    '</div>'+
+    '<div class="callout" style="margin-top:9px"><b>Assumption 2 in the architecture document.</b> '+
+    'The cross-field form (<code class="mono">PumpFlow..&gt;=--CraneMinFlow</code> in <code class="mono">R-IA-020/021/022</code>) '+
+    'is interpreted here as: the candidate option’s own attribute compared against a computed field. '+
+    'That is one reading of Appendix 4 and the one construct we want to confirm in week-one knowledge transfer.</div></div>';
+
+  h += '<div class="isec"><span class="eyebrow">Sales rules · '+list.length+' of '+all.length+'</span>'+
+    '<input class="rulesearch" id="rulesearch" placeholder="Filter by rule, option or condition…" value="'+
+      esc(state.ruleFilter)+'" style="margin-bottom:8px">'+
+    list.map(r=>{
+      const cand = r.t.k==='component' ? r.t.id : null;
+      const cs = r.c.map(raw=>({raw, met:evalCond(raw, ev.ctx, cand)}));
+      const fires = cs.every(c=>c.met);
+      const cyc = ev.culprits.includes(r.id);
+      const tname = r.t.k==='component' ? COMPONENTS[r.t.id].n
+                  : r.t.k==='family' ? FAMILIES[r.t.id].name
+                  : GROUPS[r.t.id].name;
+      return '<div class="rule'+(fires?' fires':'')+(cyc?' cycflag':'')+'">'+
+        '<div class="rule-h"><span class="rid2">'+r.id+'</span>'+
+          '<span class="rst '+(fires?'y':'n')+'">'+(fires?'fires':'no match')+'</span></div>'+
+        '<div class="rimp">→ <b>'+esc(tname)+'</b> <span class="mono" style="font-size:10.5px;color:var(--ink-3)">'+
+          r.t.id+'</span>'+(r.t.k!=='component'?'<span class="lv">'+r.t.k+'-level</span>':'')+'</div>'+
+        '<div class="rconds">'+cs.map(c=>'<div class="rc '+(c.met?'y':'n')+'">'+
+          '<span class="m">'+(c.met?'✓':'✕')+'</span><span class="x">'+esc(c.raw)+'</span></div>').join('')+'</div>'+
+      '</div>';
+    }).join('')+'</div>';
+  return h;
+}
+
+/* ==========================  RENDER + EVENTS  =========================== */
+function render(){
+  $('m-model').textContent = MODEL;
+  $('m-cfgid').textContent = state.configId.slice(0,8)+'…'+state.configId.slice(-4);
+  $('m-cfgid').title = state.configId;
+  $('m-saved').textContent = state.savedAt
+    ? 'saved ' + state.savedAt.toLocaleTimeString('en-GB') : '—';
+  renderTelemetry(); renderRail(); renderMain(); renderInspector();
+}
+
+function setMarketOptions(){
+  $('marketsel').innerHTML = MARKETS.map(m=>
+    '<option value="'+m.id+'"'+(state.market===m.id?' selected':'')+'>'+m.id+' — '+m.name+'</option>').join('');
+}
+
+document.addEventListener('click', e=>{
+  const t = e.target.closest('[data-struct],[data-group],[data-opt],[data-dd],[data-policy],[data-cyclic],[data-itab],[data-fix],[data-close-probe],#btn-new,#btn-step,#btn-prev,#btn-next,#btn-resume,#btn-prev2,#btn-next2,#btn-resume2');
+  if(!t){ if(state.openDd){ state.openDd = null; render(); } return; }
+
+  if(t.dataset.struct){ state.structure = t.dataset.struct; state.probe = null; state.openDd = null; return render(); }
+  if(t.dataset.group){ state.group = t.dataset.group; state.probe = null; state.openDd = null; return render(); }
+  if(t.dataset.itab){ state.itab = t.dataset.itab; return render(); }
+  if(t.dataset.policy){ state.policy = t.dataset.policy; state.probe = null; save(); return render(); }
+  if(t.dataset.closeProbe){ state.probe = null; return render(); }
+
+  if(t.dataset.cyclic!==undefined && t.dataset.cyclic){
+    state.cyclic = !state.cyclic;
+    state.stepMode = false; state.probe = null;
+    return run({announceRepairs:true});
+  }
+  if(t.dataset.dd){
+    state.openDd = state.openDd===t.dataset.dd ? null : t.dataset.dd;
+    return render();
+  }
+  if(t.dataset.opt){
+    const cid = t.dataset.opt, fam = t.dataset.fam;
+    state.openDd = null;
+    if(state.stepMode) return;
+    const v = view();
+    const blocked = !v.avail.has(cid);
+    if(blocked && state.policy!=='explain'){
+      state.probe = state.probe===cid ? null : cid;
+      return render();
+    }
+    if(blocked && state.policy==='explain'){
+      state.probe = cid;
+      return render();
+    }
+    state.selection[fam] = cid;
+    state.probe = null;
+    return run({announceRepairs:true, changedFamily:fam});
+  }
+  if(t.dataset.fix){
+    const info = blockInfo(t.dataset.fix, ev);
+    const fixes = (info.conds||[]).filter(c=>!c.met && c.fix);
+    fixes.forEach(c=>{ state.selection[c.fix.family] = c.fix.to; });
+    const still = t.dataset.fix;
+    run({announceRepairs:true});
+    if(!ev.avail.has(still)){ state.probe = still; render(); }
+    else { toast('Unblocked', '<code>'+esc(COMPONENTS[still].n)+'</code> is now available.'); state.probe = null; render(); }
+    return;
+  }
+  switch(t.id){
+    case 'btn-new':
+      state.configId = newId(); state.selection = {}; state.probe = null;
+      state.stepMode = false; state.cyclic = false;
+      toast('New configuration', 'Fresh UUID. Market defaults re-seeded by the engine.');
+      return run({});
+    case 'btn-step':   state.stepMode = true; state.stepPass = 1; state.probe = null; return render();
+    case 'btn-prev': case 'btn-prev2': state.stepPass = Math.max(1, state.stepPass-1); return render();
+    case 'btn-next': case 'btn-next2': state.stepPass = Math.min(ev.passes.length, state.stepPass+1); return render();
+    case 'btn-resume': case 'btn-resume2':
+      state.stepMode = false; state.stepPass = ev.passes.length; return render();
+  }
+});
+
+document.addEventListener('input', e=>{
+  if(e.target.id==='rulesearch'){
+    state.ruleFilter = e.target.value;
+    const el = e.target, pos = el.selectionStart;
+    renderInspector();
+    const n = $('rulesearch');
+    if(n){ n.focus(); try{ n.setSelectionRange(pos,pos); }catch(x){} }
+  }
+});
+
+document.addEventListener('change', e=>{
+  if(e.target.id==='marketsel'){
+    state.market = e.target.value;
+    state.probe = null; state.stepMode = false;
+    toast('Market changed to '+state.market,
+      'The model publication service re-scoped the solution space. Options not published in this market are withdrawn.');
+    run({announceRepairs:true});
+  }
+});
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    if(state.openDd){ state.openDd = null; render(); }
+    else if(state.probe){ state.probe = null; render(); }
+  }
+});
+
+/* ---- boot -------------------------------------------------------------- */
+load();
+setMarketOptions();
+run({});
+</script>
+
