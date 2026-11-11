@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light dark;
+  --bg: #f4f5f8;
+  --card: #ffffff;
+  --fg: #14181f;
+  --muted: #5b6472;
+  --border: #dde1e9;
+  --accent: #2f5bea;
+  --on-accent: #ffffff;
+  --ai: #3b5bdb;
+  --other: #0f9b86;
+  --target: #d97706;
+  --pos: #15803d;
+  --neg: #c62828;
+  --warn: #a16207;
+  --grid: #e5e8ee;
+  --input: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1117;
+    --card: #171b24;
+    --fg: #e8ebf1;
+    --muted: #98a2b3;
+    --border: #2a3140;
+    --accent: #7b9cff;
+    --on-accent: #0e1117;
+    --ai: #7b9cff;
+    --other: #3ccfb4;
+    --target: #ffb347;
+    --pos: #4ade80;
+    --neg: #ff7b7b;
+    --warn: #fbbf24;
+    --grid: #262d3a;
+    --input: #0e1117;
+  }
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+@layer components {
+  .inp {
+    @apply w-full rounded-md border border-line px-2 py-1 text-sm text-fg;
+    background: var(--input);
+  }
+  .inp:focus {
+    @apply outline-none ring-2 ring-accent;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-1 rounded-md border border-line px-3 py-1.5 text-sm font-medium text-fg hover:bg-black/5 disabled:opacity-40;
+    background: var(--card);
+  }
+  .btn-primary {
+    @apply border-transparent bg-accent hover:opacity-90;
+    color: var(--on-accent);
+  }
+  .card {
+    @apply rounded-xl border border-line p-4;
+    background: var(--card);
+  }
+  .card h3 {
+    @apply mb-3 text-sm font-semibold;
+  }
+}
+
+input[type='range'] {
+  accent-color: var(--accent);
+  width: 100%;
+}
+.recharts-text {
+  fill: var(--muted);
+}
